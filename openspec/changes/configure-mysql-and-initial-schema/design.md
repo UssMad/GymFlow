@@ -23,3 +23,9 @@ the ignored `.env` file; `.env.example` has safe local defaults.
 Owned records cascade on deletion. Optional historical references use
 `nullOnDelete`. Unique and composite indexes protect one-to-one links and the
 order of sessions inside a programme.
+
+## MLD alignment
+
+The application stores `nom` and `prenom` separately on `users`. Coach
+availability is a string, while sport-profile availability days remain JSON and
+preferences are free text, matching the approved MLD.
