@@ -6,8 +6,16 @@
 
 ## 2. Initial domain schema
 
-- [ ] 2.1 Add the GymFlow role to users.
-- [ ] 2.2 Create migrations for coaches, members, and sport profiles.
-- [ ] 2.3 Create migrations for AI generations, programmes, workout sessions,
+- [x] 2.1 Add the GymFlow role to users.
+- [x] 2.2 Create migrations for coaches, members, and sport profiles.
+- [x] 2.3 Create migrations for AI generations, programmes, workout sessions,
   exercises, and exercise details.
-- [ ] 2.4 Run migrations and verify the resulting schema.
+- [x] 2.4 Run migrations and verify the resulting schema.
+
+## Verification
+
+- [x] `php artisan migrate` completed against local MySQL.
+- [x] `php artisan migrate:status` reports every migration as ran.
+- [x] MySQL table listing contains all GymFlow tables.
+- [x] Laravel Pint passed for the changed migrations.
+- [ ] Full test suite: timed out in this environment and needs separate follow-up.
