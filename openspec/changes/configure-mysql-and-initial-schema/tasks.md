@@ -19,3 +19,9 @@
 - [x] MySQL table listing contains all GymFlow tables.
 - [x] Laravel Pint passed for the changed migrations.
 - [ ] Full test suite: timed out in this environment and needs separate follow-up.
+
+## 3. MLD alignment after review
+
+- [x] 3.1 Replace `users.name` with `nom` and add `prenom`.
+- [x] 3.2 Align coach and sport-profile field types with the MLD.
+- [x] 3.3 Run the corrective migration and verify the schema.
