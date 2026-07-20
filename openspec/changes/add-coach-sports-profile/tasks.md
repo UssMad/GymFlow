@@ -6,11 +6,11 @@
 
 ## 2. GFRS-38 - Sports profile update
 
-- [ ] 2.1 Add validated profile creation and update input for assigned coaches.
-- [ ] 2.2 Add the update route and persist profile data for future AI generation.
-- [ ] 2.3 Add feature coverage for validation and profile updates.
+- [x] 2.1 Add validated profile creation and update input for assigned coaches.
+- [x] 2.2 Add the update route and persist profile data for future AI generation.
+- [x] 2.3 Add feature coverage for validation and profile updates.
 
 ## 3. Verification
 
 - [x] 3.1 Run focused tests, route verification, and Pint for GFRS-37.
-- [ ] 3.2 Run focused tests, route verification, and Pint for GFRS-38.
+- [x] 3.2 Run focused tests, route verification, and Pint for GFRS-38.

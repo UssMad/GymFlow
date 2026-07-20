@@ -23,5 +23,6 @@ Route::prefix('coach')->group(function (): void {
         Route::get('me', [CoachAuthController::class, 'me']);
         Route::post('logout', [CoachAuthController::class, 'logout']);
         Route::get('members/{member}/sport-profile', [CoachSportProfileController::class, 'show']);
+        Route::put('members/{member}/sport-profile', [CoachSportProfileController::class, 'update']);
     });
 });
