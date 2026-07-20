@@ -14,8 +14,6 @@
   protected access.
 - [x] 3.2 Run formatter and the focused feature test.
 
-## Runtime note
+## Runtime verification
 
-- [ ] Apply the Sanctum token migration to local MySQL. This is blocked by the
-  current XAMPP MySQL TCP authentication-plugin configuration; the focused Pest
-  suite uses SQLite and passes.
+- [x] Apply the Sanctum token migration to local MySQL.
