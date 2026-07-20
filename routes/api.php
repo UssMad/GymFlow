@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AdminAuthController;
+use App\Http\Controllers\Api\AdminMemberController;
 use App\Http\Controllers\Api\CoachAuthController;
 use Illuminate\Support\Facades\Route;
 
@@ -10,6 +11,7 @@ Route::prefix('admin')->group(function (): void {
     Route::middleware(['auth:sanctum', 'role:admin'])->group(function (): void {
         Route::get('me', [AdminAuthController::class, 'me']);
         Route::post('logout', [AdminAuthController::class, 'logout']);
+        Route::apiResource('members', AdminMemberController::class)->only(['index', 'store', 'show', 'update']);
     });
 });
 
