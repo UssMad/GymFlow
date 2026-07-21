@@ -12,6 +12,6 @@
 
 ## 3. Verification
 
-- [ ] 3.1 Apply the GFRS-39 migrations to local MySQL (pending MySQL service).
+- [x] 3.1 Apply the GFRS-39 migrations to local MySQL.
 - [x] 3.2 Run focused tests and Pint for GFRS-39.
 - [x] 3.3 Run focused tests, route verification, and Pint for GFRS-40.

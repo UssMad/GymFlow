@@ -11,6 +11,32 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('member_subscriptions')) {
+            $foreignKeys = Schema::getForeignKeys('member_subscriptions');
+            $hasPlanForeignKey = collect($foreignKeys)->contains(
+                fn (array $foreignKey): bool => $foreignKey['name'] === 'member_subscriptions_subscription_plan_id_foreign',
+            );
+            $indexes = Schema::getIndexes('member_subscriptions');
+            $hasHistoryIndex = collect($indexes)->contains(
+                fn (array $index): bool => $index['name'] === 'member_subscriptions_member_date_fin_index',
+            );
+
+            Schema::table('member_subscriptions', function (Blueprint $table) use ($hasPlanForeignKey, $hasHistoryIndex) {
+                if (! $hasPlanForeignKey) {
+                    $table->foreign('subscription_plan_id')
+                        ->references('id')
+                        ->on('subscription_plans')
+                        ->restrictOnDelete();
+                }
+
+                if (! $hasHistoryIndex) {
+                    $table->index(['member_id', 'date_fin'], 'member_subscriptions_member_date_fin_index');
+                }
+            });
+
+            return;
+        }
+
         Schema::create('member_subscriptions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('member_id')->constrained('members')->cascadeOnDelete();
@@ -20,7 +46,7 @@ return new class extends Migration
             $table->enum('statut', ['actif', 'expire', 'suspendu'])->default('actif');
             $table->timestamps();
 
-            $table->index(['member_id', 'date_fin']);
+            $table->index(['member_id', 'date_fin'], 'member_subscriptions_member_date_fin_index');
         });
     }
 
