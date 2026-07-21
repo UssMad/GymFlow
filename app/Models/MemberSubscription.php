@@ -39,6 +39,6 @@ class MemberSubscription extends Model
             return 'suspendu';
         }
 
-        return $this->date_fin->isPast() ? 'expire' : 'actif';
+        return $this->date_fin->lt(today()) ? 'expire' : 'actif';
     }
 }

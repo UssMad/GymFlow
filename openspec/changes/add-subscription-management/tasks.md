@@ -6,12 +6,12 @@
 
 ## 2. GFRS-40 - Subscription assignment
 
-- [ ] 2.1 Add validated administrator endpoints for assignment and history.
-- [ ] 2.2 Synchronize the member's current subscription status from an assignment.
-- [ ] 2.3 Add feature coverage for authorization and invalid dates.
+- [x] 2.1 Add validated administrator endpoints for assignment and history.
+- [x] 2.2 Synchronize the member's current subscription status from an assignment.
+- [x] 2.3 Add feature coverage for authorization and invalid dates.
 
 ## 3. Verification
 
 - [ ] 3.1 Apply the GFRS-39 migrations to local MySQL (pending MySQL service).
 - [x] 3.2 Run focused tests and Pint for GFRS-39.
-- [ ] 3.3 Run focused tests, route verification, and Pint for GFRS-40.
+- [x] 3.3 Run focused tests, route verification, and Pint for GFRS-40.
