@@ -7,10 +7,10 @@
 
 ## 2. GFRS-42 - Store generated drafts safely
 
-- [ ] 2.1 Call the structured agent in the queued job and record a successful or failed generation.
-- [ ] 2.2 Persist a structured weekly programme as a draft with sessions and exercises.
-- [ ] 2.3 Add tests for generated drafts and failed AI calls.
+- [x] 2.1 Call the structured agent in the queued job and record a successful or failed generation.
+- [x] 2.2 Persist a structured weekly programme as a draft with sessions and exercises.
+- [x] 2.3 Add tests for generated drafts and failed AI calls.
 
 ## 3. Verification
 
-- [ ] 3.1 Run database migrations, focused tests, routes, and Pint.
+- [x] 3.1 Run database migrations, focused tests, routes, and Pint.

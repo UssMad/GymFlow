@@ -1,6 +1,8 @@
 <?php
 
+use App\Ai\Agents\WorkoutProgrammeGenerator;
 use App\Jobs\GenerateWorkoutProgrammeDraft;
+use App\Models\AiGeneration;
 use App\Models\Coach;
 use App\Models\Member;
 use App\Models\SportProfile;
@@ -80,4 +82,68 @@ it('requires a profile and prevents another coach from requesting generation', f
 
     $this->postJson("/api/coach/members/{$member->id}/ai-generations")
         ->assertForbidden();
+});
+
+it('stores structured AI output as an unpublished programme draft', function () {
+    $coach = createAiCoach();
+    $member = createAiMember($coach);
+    $generation = AiGeneration::query()->create([
+        'membre_id' => $member->id,
+        'demande_par_coach_id' => $coach->id,
+        'contexte_utilise' => [
+            'objectif' => 'Prise de masse',
+            'niveau' => 'intermediaire',
+            'jours_disponibles' => ['lundi'],
+            'preferences' => 'Poids libres',
+        ],
+        'generee_le' => now(),
+    ]);
+    WorkoutProgrammeGenerator::fake([[
+        'titre' => 'Programme prise de masse',
+        'sessions' => [[
+            'jour' => 'Lundi',
+            'notes' => 'Haut du corps',
+            'exercices' => [[
+                'nom' => 'Developpe couche',
+                'groupe_musculaire' => 'Pectoraux',
+                'type' => 'musculation',
+                'series' => 4,
+                'repetitions' => 10,
+                'repos' => '90 secondes',
+                'duree_cardio' => 0,
+                'notes' => 'Controle du mouvement.',
+                'progression' => 'Ajouter une repetition si possible.',
+            ]],
+        ]],
+    ]])->preventStrayPrompts();
+
+    (new GenerateWorkoutProgrammeDraft($generation->id))->handle(app(WorkoutProgrammeGenerator::class));
+
+    $this->assertDatabaseHas('ai_generations', ['id' => $generation->id, 'statut' => 'terminee']);
+    $this->assertDatabaseHas('programmes', [
+        'generation_id' => $generation->id,
+        'membre_id' => $member->id,
+        'statut' => 'brouillon',
+        'source' => 'ia',
+    ]);
+    $this->assertDatabaseCount('workout_sessions', 1);
+    $this->assertDatabaseCount('exercise_details', 1);
+    WorkoutProgrammeGenerator::assertPrompted(fn ($prompt) => str($prompt->prompt)->contains('Prise de masse'));
+});
+
+it('marks the generation as failed when the AI provider throws', function () {
+    $coach = createAiCoach();
+    $member = createAiMember($coach);
+    $generation = AiGeneration::query()->create([
+        'membre_id' => $member->id,
+        'demande_par_coach_id' => $coach->id,
+        'contexte_utilise' => ['objectif' => 'Endurance', 'niveau' => 'debutant'],
+        'generee_le' => now(),
+    ]);
+    WorkoutProgrammeGenerator::fake([fn () => throw new RuntimeException('Provider unavailable')]);
+
+    (new GenerateWorkoutProgrammeDraft($generation->id))->handle(app(WorkoutProgrammeGenerator::class));
+
+    $this->assertDatabaseHas('ai_generations', ['id' => $generation->id, 'statut' => 'echec']);
+    $this->assertDatabaseCount('programmes', 0);
 });
