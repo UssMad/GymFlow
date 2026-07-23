@@ -33,6 +33,10 @@ class CoachAiGenerationController extends Controller
                 'jours_disponibles' => $profile->jours_disponibles,
                 'preferences' => $profile->preferences,
                 'historique_programmes' => $member->programmes()->latest('id')->limit(3)->get(['titre', 'statut'])->all(),
+                'coach_constraints' => [
+                    'specialite' => $coach->specialite,
+                    'disponibilite' => $coach->disponibilite,
+                ],
             ],
             'generee_le' => now(),
         ]);

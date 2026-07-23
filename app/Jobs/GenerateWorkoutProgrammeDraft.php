@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Ai\Agents\WorkoutProgrammeGenerator;
+use App\Ai\Prompts\WorkoutProgrammePrompt;
 use App\Models\AiGeneration;
 use App\Models\Exercise;
 use App\Models\ExerciseDetail;
@@ -29,7 +30,7 @@ class GenerateWorkoutProgrammeDraft implements ShouldQueue
         }
 
         try {
-            $draft = $agent->prompt($this->promptFor($generation->contexte_utilise))->toArray();
+            $draft = $agent->prompt(WorkoutProgrammePrompt::for(WorkoutProgrammePrompt::context($generation->contexte_utilise)))->toArray();
 
             DB::transaction(function () use ($generation, $draft): void {
                 $programme = Programme::query()->create([
@@ -86,11 +87,5 @@ class GenerateWorkoutProgrammeDraft implements ShouldQueue
                 'reponse_brute' => ['error' => $exception->getMessage()],
             ]);
         }
-    }
-
-    private function promptFor(array $context): string
-    {
-        return 'Generate a weekly coach-review workout draft from this member profile JSON: '
-            .json_encode($context, JSON_THROW_ON_ERROR);
     }
 }
