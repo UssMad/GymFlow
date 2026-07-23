@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AdminMemberController;
 use App\Http\Controllers\Api\AdminMemberSubscriptionController;
 use App\Http\Controllers\Api\CoachAiGenerationController;
 use App\Http\Controllers\Api\CoachAuthController;
+use App\Http\Controllers\Api\CoachMemberProgressController;
 use App\Http\Controllers\Api\CoachProgrammeController;
 use App\Http\Controllers\Api\CoachSportProfileController;
 use App\Http\Controllers\Api\MemberAuthController;
@@ -32,6 +33,7 @@ Route::prefix('coach')->group(function (): void {
         Route::post('logout', [CoachAuthController::class, 'logout']);
         Route::get('members/{member}/sport-profile', [CoachSportProfileController::class, 'show']);
         Route::put('members/{member}/sport-profile', [CoachSportProfileController::class, 'update']);
+        Route::get('members/{member}/progress', [CoachMemberProgressController::class, 'show']);
         Route::post('members/{member}/ai-generations', [CoachAiGenerationController::class, 'store']);
         Route::get('ai-generations/{generation}', [CoachAiGenerationController::class, 'show']);
         Route::post('members/{member}/programmes', [CoachProgrammeController::class, 'store']);
