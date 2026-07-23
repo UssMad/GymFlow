@@ -56,4 +56,9 @@ class Member extends Model
     {
         return $this->hasMany(MemberSubscription::class);
     }
+
+    public function attendances(): HasMany
+    {
+        return $this->hasMany(Attendance::class, 'membre_id');
+    }
 }
