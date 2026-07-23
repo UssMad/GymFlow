@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\CoachProgrammeController;
 use App\Http\Controllers\Api\CoachSportProfileController;
 use App\Http\Controllers\Api\MemberAuthController;
 use App\Http\Controllers\Api\MemberProgrammeController;
+use App\Http\Controllers\Api\MemberWorkoutSessionController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->group(function (): void {
@@ -50,5 +51,6 @@ Route::prefix('member')->group(function (): void {
         Route::get('programmes/current', [MemberProgrammeController::class, 'current']);
         Route::get('programmes/history', [MemberProgrammeController::class, 'history']);
         Route::get('programmes/{programme}', [MemberProgrammeController::class, 'show']);
+        Route::put('workout-sessions/{workoutSession}/completion', [MemberWorkoutSessionController::class, 'complete']);
     });
 });
