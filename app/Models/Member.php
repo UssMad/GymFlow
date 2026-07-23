@@ -51,4 +51,9 @@ class Member extends Model
     {
         return $this->hasMany(Programme::class, 'membre_id');
     }
+
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(MemberSubscription::class);
+    }
 }
