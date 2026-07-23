@@ -107,6 +107,30 @@ class CoachProgrammeController extends Controller
         return new ProgrammeResource($programme->fresh()->load('sessions.exerciseDetails.exercise'));
     }
 
+    public function validateProgramme(Request $request, Programme $programme): ProgrammeResource
+    {
+        $this->ensureCoachOwnsProgramme($request, $programme);
+        abort_unless($programme->statut === 'brouillon', 422, 'Only draft programmes can be validated.');
+
+        $programme->update([
+            'statut' => 'valide',
+            'coach_validateur_id' => $request->user()->coach->id,
+            'date_validation' => now(),
+        ]);
+
+        return new ProgrammeResource($programme->fresh());
+    }
+
+    public function publish(Request $request, Programme $programme): ProgrammeResource
+    {
+        $this->ensureCoachOwnsProgramme($request, $programme);
+        abort_unless($programme->statut === 'valide', 422, 'Only validated programmes can be published.');
+
+        $programme->update(['statut' => 'publie']);
+
+        return new ProgrammeResource($programme->fresh());
+    }
+
     private function ensureCoachOwnsProgramme(Request $request, Programme $programme): void
     {
         $coach = $request->user()->coach;

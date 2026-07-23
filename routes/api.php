@@ -33,5 +33,7 @@ Route::prefix('coach')->group(function (): void {
         Route::post('members/{member}/programmes', [CoachProgrammeController::class, 'store']);
         Route::get('programmes/{programme}', [CoachProgrammeController::class, 'show']);
         Route::put('programmes/{programme}', [CoachProgrammeController::class, 'update']);
+        Route::post('programmes/{programme}/validate', [CoachProgrammeController::class, 'validateProgramme']);
+        Route::post('programmes/{programme}/publish', [CoachProgrammeController::class, 'publish']);
     });
 });

@@ -112,3 +112,44 @@ it('prevents another coach from viewing or editing a programme draft', function 
     $this->getJson("/api/coach/programmes/{$programme->id}")->assertForbidden();
     $this->putJson("/api/coach/programmes/{$programme->id}", reviewProgrammePayload($exercise))->assertForbidden();
 });
+
+it('requires coach validation before a programme can be published', function () {
+    $coach = createReviewCoach();
+    $programme = createReviewProgramme($coach);
+
+    Sanctum::actingAs($coach->user, ['coach']);
+
+    $this->postJson("/api/coach/programmes/{$programme->id}/publish")
+        ->assertUnprocessable();
+
+    $this->assertDatabaseHas('programmes', ['id' => $programme->id, 'statut' => 'brouillon']);
+
+    $this->postJson("/api/coach/programmes/{$programme->id}/validate")
+        ->assertOk()
+        ->assertJsonPath('data.statut', 'valide')
+        ->assertJsonPath('data.coach_validateur_id', $coach->id);
+
+    $this->assertDatabaseHas('programmes', [
+        'id' => $programme->id,
+        'statut' => 'valide',
+        'coach_validateur_id' => $coach->id,
+    ]);
+
+    $this->postJson("/api/coach/programmes/{$programme->id}/publish")
+        ->assertOk()
+        ->assertJsonPath('data.statut', 'publie');
+
+    $this->assertDatabaseHas('programmes', ['id' => $programme->id, 'statut' => 'publie']);
+});
+
+it('does not allow a validated programme to be edited', function () {
+    $coach = createReviewCoach();
+    $programme = createReviewProgramme($coach);
+    $programme->update(['statut' => 'valide']);
+    $exercise = Exercise::query()->firstOrFail();
+
+    Sanctum::actingAs($coach->user, ['coach']);
+
+    $this->putJson("/api/coach/programmes/{$programme->id}", reviewProgrammePayload($exercise))
+        ->assertUnprocessable();
+});
