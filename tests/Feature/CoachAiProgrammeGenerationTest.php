@@ -154,6 +154,55 @@ it('marks the generation as failed when the AI provider throws', function () {
         app(WorkoutProgrammeDraftValidator::class),
     );
 
-    $this->assertDatabaseHas('ai_generations', ['id' => $generation->id, 'statut' => 'echec']);
+    $this->assertDatabaseHas('ai_generations', [
+        'id' => $generation->id,
+        'statut' => 'echec',
+        'reponse_brute->error_code' => 'generation_failed',
+        'reponse_brute->error' => 'AI generation failed. Please try again or review the member profile.',
+    ]);
     $this->assertDatabaseCount('programmes', 0);
+});
+
+it('rejects incomplete AI output and exposes a clear error only to the assigned coach', function () {
+    $coach = createAiCoach();
+    $member = createAiMember($coach);
+    $generation = AiGeneration::query()->create([
+        'membre_id' => $member->id,
+        'demande_par_coach_id' => $coach->id,
+        'contexte_utilise' => ['objectif' => 'Endurance', 'niveau' => 'debutant'],
+        'generee_le' => now(),
+    ]);
+    WorkoutProgrammeGenerator::fake([[
+        'titre' => 'Programme incomplet',
+        'sessions' => [[
+            'jour' => 'Lundi',
+            'notes' => 'Cardio.',
+            'exercices' => [],
+        ]],
+    ]])->preventStrayPrompts();
+
+    (new GenerateWorkoutProgrammeDraft($generation->id))->handle(
+        app(WorkoutProgrammeGenerator::class),
+        app(WorkoutProgrammeDraftValidator::class),
+    );
+
+    $this->assertDatabaseHas('ai_generations', [
+        'id' => $generation->id,
+        'statut' => 'echec',
+        'reponse_brute->error_code' => 'invalid_response',
+    ]);
+    $this->assertDatabaseCount('programmes', 0);
+
+    Sanctum::actingAs($coach->user, ['coach']);
+
+    $this->getJson("/api/coach/ai-generations/{$generation->id}")
+        ->assertOk()
+        ->assertJsonPath('data.statut', 'echec')
+        ->assertJsonPath('data.error_code', 'invalid_response')
+        ->assertJsonPath('data.error', 'Generated programme is incomplete: at least one exercise or cardio recommendation at session 1.');
+
+    $otherCoach = createAiCoach();
+    Sanctum::actingAs($otherCoach->user, ['coach']);
+
+    $this->getJson("/api/coach/ai-generations/{$generation->id}")->assertForbidden();
 });

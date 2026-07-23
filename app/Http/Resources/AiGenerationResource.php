@@ -15,6 +15,8 @@ class AiGenerationResource extends JsonResource
             'demande_par_coach_id' => $this->demande_par_coach_id,
             'statut' => $this->statut,
             'generee_le' => $this->generee_le,
+            'error_code' => $this->when($this->statut === 'echec', data_get($this->reponse_brute, 'error_code')),
+            'error' => $this->when($this->statut === 'echec', data_get($this->reponse_brute, 'error')),
         ];
     }
 }

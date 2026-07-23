@@ -12,6 +12,14 @@ use Illuminate\Http\Request;
 
 class CoachAiGenerationController extends Controller
 {
+    public function show(Request $request, AiGeneration $generation): AiGenerationResource
+    {
+        $coach = $request->user()->coach;
+        abort_unless($coach && $generation->member->coach_id === $coach->id, 403);
+
+        return new AiGenerationResource($generation);
+    }
+
     public function store(Request $request, Member $member): JsonResponse
     {
         $coach = $request->user()->coach;

@@ -13,7 +13,9 @@ use App\Models\WorkoutSession;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Throwable;
 
 class GenerateWorkoutProgrammeDraft implements ShouldQueue
@@ -83,10 +85,26 @@ class GenerateWorkoutProgrammeDraft implements ShouldQueue
                     'reponse_brute' => $draft,
                 ]);
             });
-        } catch (Throwable $exception) {
+        } catch (InvalidArgumentException $exception) {
             $generation->update([
                 'statut' => 'echec',
-                'reponse_brute' => ['error' => $exception->getMessage()],
+                'reponse_brute' => [
+                    'error_code' => 'invalid_response',
+                    'error' => $exception->getMessage(),
+                ],
+            ]);
+        } catch (Throwable $exception) {
+            Log::warning('AI workout programme generation failed.', [
+                'generation_id' => $generation->id,
+                'exception' => $exception,
+            ]);
+
+            $generation->update([
+                'statut' => 'echec',
+                'reponse_brute' => [
+                    'error_code' => 'generation_failed',
+                    'error' => 'AI generation failed. Please try again or review the member profile.',
+                ],
             ]);
         }
     }
