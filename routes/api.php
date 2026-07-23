@@ -31,5 +31,7 @@ Route::prefix('coach')->group(function (): void {
         Route::put('members/{member}/sport-profile', [CoachSportProfileController::class, 'update']);
         Route::post('members/{member}/ai-generations', [CoachAiGenerationController::class, 'store']);
         Route::post('members/{member}/programmes', [CoachProgrammeController::class, 'store']);
+        Route::get('programmes/{programme}', [CoachProgrammeController::class, 'show']);
+        Route::put('programmes/{programme}', [CoachProgrammeController::class, 'update']);
     });
 });
