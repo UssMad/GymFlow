@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\CoachAiGenerationController;
 use App\Http\Controllers\Api\CoachAuthController;
 use App\Http\Controllers\Api\CoachProgrammeController;
 use App\Http\Controllers\Api\CoachSportProfileController;
+use App\Http\Controllers\Api\MemberAuthController;
+use App\Http\Controllers\Api\MemberProgrammeController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->group(function (): void {
@@ -35,5 +37,16 @@ Route::prefix('coach')->group(function (): void {
         Route::put('programmes/{programme}', [CoachProgrammeController::class, 'update']);
         Route::post('programmes/{programme}/validate', [CoachProgrammeController::class, 'validateProgramme']);
         Route::post('programmes/{programme}/publish', [CoachProgrammeController::class, 'publish']);
+    });
+});
+
+Route::prefix('member')->group(function (): void {
+    Route::post('login', [MemberAuthController::class, 'login']);
+
+    Route::middleware(['auth:sanctum', 'role:member'])->group(function (): void {
+        Route::get('me', [MemberAuthController::class, 'me']);
+        Route::post('logout', [MemberAuthController::class, 'logout']);
+        Route::get('programmes/current', [MemberProgrammeController::class, 'current']);
+        Route::get('programmes/{programme}', [MemberProgrammeController::class, 'show']);
     });
 });
