@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AdminMemberController;
 use App\Http\Controllers\Api\AdminMemberSubscriptionController;
 use App\Http\Controllers\Api\CoachAiGenerationController;
 use App\Http\Controllers\Api\CoachAuthController;
+use App\Http\Controllers\Api\CoachProgrammeController;
 use App\Http\Controllers\Api\CoachSportProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -29,5 +30,6 @@ Route::prefix('coach')->group(function (): void {
         Route::get('members/{member}/sport-profile', [CoachSportProfileController::class, 'show']);
         Route::put('members/{member}/sport-profile', [CoachSportProfileController::class, 'update']);
         Route::post('members/{member}/ai-generations', [CoachAiGenerationController::class, 'store']);
+        Route::post('members/{member}/programmes', [CoachProgrammeController::class, 'store']);
     });
 });
