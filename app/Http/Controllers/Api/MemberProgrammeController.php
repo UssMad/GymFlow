@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\ProgrammeResource;
 use App\Models\Programme;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class MemberProgrammeController extends Controller
 {
@@ -29,6 +30,17 @@ class MemberProgrammeController extends Controller
         abort_unless($member && $programme->membre_id === $member->id && $programme->statut === 'publie', 404);
 
         return new ProgrammeResource($programme->load('sessions.exerciseDetails.exercise'));
+    }
+
+    public function history(Request $request): AnonymousResourceCollection
+    {
+        $programmes = $this->publishedProgrammes($request)
+            ->whereNotNull('date_fin')
+            ->whereDate('date_fin', '<', today())
+            ->orderByDesc('date_fin')
+            ->paginate();
+
+        return ProgrammeResource::collection($programmes);
     }
 
     private function publishedProgrammes(Request $request)

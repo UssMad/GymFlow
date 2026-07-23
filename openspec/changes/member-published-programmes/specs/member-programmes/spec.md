@@ -14,3 +14,13 @@ The system SHALL allow an authenticated member to retrieve only that member's cu
 
 - **WHEN** a member requests a programme that is not their own published programme
 - **THEN** the system returns `404 Not Found`.
+
+## Requirement: Member views programme history
+
+The system SHALL allow a member to retrieve that member's published programmes whose end date has passed.
+
+### Scenario: Retrieve historic programmes
+
+- **WHEN** a member requests programme history
+- **THEN** the system returns only that member's published programmes with an end date before today
+- **AND THEN** the programmes are ordered from the most recently completed to the oldest.

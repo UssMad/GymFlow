@@ -86,3 +86,18 @@ it('does not expose drafts or another member published programme', function () {
     $this->getJson("/api/member/programmes/{$draft->id}")->assertNotFound();
     $this->getJson("/api/member/programmes/{$otherPublished->id}")->assertNotFound();
 });
+
+it('lists only the member past published programmes in history', function () {
+    $member = createProgrammeMember();
+    $pastPublished = createMemberProgramme($member, 'publie', today()->subDay()->toDateString());
+    createMemberProgramme($member, 'brouillon', today()->subDay()->toDateString());
+    createMemberProgramme(createProgrammeMember(), 'publie', today()->subDay()->toDateString());
+
+    Sanctum::actingAs($member->user, ['member']);
+
+    $this->getJson('/api/member/programmes/history')
+        ->assertOk()
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.id', $pastPublished->id)
+        ->assertJsonPath('data.0.statut', 'publie');
+});

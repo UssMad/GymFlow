@@ -47,6 +47,7 @@ Route::prefix('member')->group(function (): void {
         Route::get('me', [MemberAuthController::class, 'me']);
         Route::post('logout', [MemberAuthController::class, 'logout']);
         Route::get('programmes/current', [MemberProgrammeController::class, 'current']);
+        Route::get('programmes/history', [MemberProgrammeController::class, 'history']);
         Route::get('programmes/{programme}', [MemberProgrammeController::class, 'show']);
     });
 });
