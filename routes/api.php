@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AdminAttendanceController;
 use App\Http\Controllers\Api\AdminAuthController;
 use App\Http\Controllers\Api\AdminMemberController;
 use App\Http\Controllers\Api\AdminMemberSubscriptionController;
@@ -20,6 +21,8 @@ Route::prefix('admin')->group(function (): void {
         Route::get('me', [AdminAuthController::class, 'me']);
         Route::post('logout', [AdminAuthController::class, 'logout']);
         Route::apiResource('members', AdminMemberController::class)->only(['index', 'store', 'show', 'update']);
+        Route::get('attendances', [AdminAttendanceController::class, 'index']);
+        Route::post('members/{member}/attendances', [AdminAttendanceController::class, 'store']);
         Route::get('members/{member}/subscriptions', [AdminMemberSubscriptionController::class, 'index']);
         Route::post('members/{member}/subscriptions', [AdminMemberSubscriptionController::class, 'store']);
     });
