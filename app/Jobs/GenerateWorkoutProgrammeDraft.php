@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Ai\Agents\WorkoutProgrammeGenerator;
 use App\Ai\Prompts\WorkoutProgrammePrompt;
+use App\Ai\Validators\WorkoutProgrammeDraftValidator;
 use App\Models\AiGeneration;
 use App\Models\Exercise;
 use App\Models\ExerciseDetail;
@@ -21,7 +22,7 @@ class GenerateWorkoutProgrammeDraft implements ShouldQueue
 
     public function __construct(public int $generationId) {}
 
-    public function handle(WorkoutProgrammeGenerator $agent): void
+    public function handle(WorkoutProgrammeGenerator $agent, WorkoutProgrammeDraftValidator $validator): void
     {
         $generation = AiGeneration::query()->find($this->generationId);
 
@@ -31,6 +32,7 @@ class GenerateWorkoutProgrammeDraft implements ShouldQueue
 
         try {
             $draft = $agent->prompt(WorkoutProgrammePrompt::for(WorkoutProgrammePrompt::context($generation->contexte_utilise)))->toArray();
+            $validator->validate($draft);
 
             DB::transaction(function () use ($generation, $draft): void {
                 $programme = Programme::query()->create([

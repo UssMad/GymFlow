@@ -1,6 +1,7 @@
 <?php
 
 use App\Ai\Agents\WorkoutProgrammeGenerator;
+use App\Ai\Validators\WorkoutProgrammeDraftValidator;
 use App\Jobs\GenerateWorkoutProgrammeDraft;
 use App\Models\AiGeneration;
 use App\Models\Coach;
@@ -117,7 +118,10 @@ it('stores structured AI output as an unpublished programme draft', function () 
         ]],
     ]])->preventStrayPrompts();
 
-    (new GenerateWorkoutProgrammeDraft($generation->id))->handle(app(WorkoutProgrammeGenerator::class));
+    (new GenerateWorkoutProgrammeDraft($generation->id))->handle(
+        app(WorkoutProgrammeGenerator::class),
+        app(WorkoutProgrammeDraftValidator::class),
+    );
 
     $this->assertDatabaseHas('ai_generations', ['id' => $generation->id, 'statut' => 'terminee']);
     $this->assertDatabaseHas('programmes', [
@@ -145,7 +149,10 @@ it('marks the generation as failed when the AI provider throws', function () {
     ]);
     WorkoutProgrammeGenerator::fake([fn () => throw new RuntimeException('Provider unavailable')]);
 
-    (new GenerateWorkoutProgrammeDraft($generation->id))->handle(app(WorkoutProgrammeGenerator::class));
+    (new GenerateWorkoutProgrammeDraft($generation->id))->handle(
+        app(WorkoutProgrammeGenerator::class),
+        app(WorkoutProgrammeDraftValidator::class),
+    );
 
     $this->assertDatabaseHas('ai_generations', ['id' => $generation->id, 'statut' => 'echec']);
     $this->assertDatabaseCount('programmes', 0);
