@@ -128,6 +128,9 @@ it('stores structured AI output as an unpublished programme draft', function () 
     ]);
     $this->assertDatabaseCount('workout_sessions', 1);
     $this->assertDatabaseCount('exercise_details', 1);
+    expect($generation->fresh()->reponse_brute)
+        ->toHaveKey('titre')
+        ->toHaveKey('sessions.0.exercices.0.progression');
     WorkoutProgrammeGenerator::assertPrompted(fn ($prompt) => str($prompt->prompt)->contains('Prise de masse'));
 });
 
