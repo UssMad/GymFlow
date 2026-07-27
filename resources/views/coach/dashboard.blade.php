@@ -31,6 +31,7 @@
                             <div class="progress-track" aria-label="{{ $summary['completion_rate'] }} percent complete"><span style="width: {{ $summary['completion_rate'] }}%"></span></div>
                         </div>
                         <span class="difficulty-label">{{ $summary['difficulty']['difficile'] }} hard</span>
+                        <a class="table-link" href="{{ route('coach.members.show', $member) }}">Open workspace</a>
                     </div>
                 @empty
                     <div class="empty-state"><strong>No members assigned.</strong><span>Ask an administrator to assign a member to your coaching profile.</span></div>
@@ -44,6 +45,7 @@
                         <span class="status-pill {{ $programme->statut === 'valide' ? 'status-good' : 'status-review' }}">{{ ucfirst($programme->statut) }}</span>
                         <strong>{{ $programme->titre }}</strong>
                         <small>{{ $programme->member->user->prenom }} {{ $programme->member->user->nom }} / {{ ucfirst($programme->source) }}</small>
+                        <a class="table-link" href="{{ route('coach.members.show', $programme->member) }}">Review programme</a>
                     </div>
                 @empty
                     <div class="empty-state compact"><strong>Your queue is clear.</strong><span>Draft and validated programmes will show up here.</span></div>

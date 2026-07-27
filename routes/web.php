@@ -30,11 +30,19 @@ Route::middleware('auth')->group(function (): void {
 
     Route::prefix('coach')->middleware('role:coach')->group(function (): void {
         Route::get('/dashboard', [CoachDashboardController::class, 'index'])->name('coach.dashboard');
+        Route::get('/members/{member}', [CoachDashboardController::class, 'showMember'])->name('coach.members.show');
+        Route::put('/members/{member}/sport-profile', [CoachDashboardController::class, 'updateSportProfile'])->name('coach.members.sport-profile.update');
+        Route::post('/members/{member}/ai-generations', [CoachDashboardController::class, 'generateProgramme'])->name('coach.members.ai-generations.store');
+        Route::put('/programmes/{programme}', [CoachDashboardController::class, 'updateProgramme'])->name('coach.programmes.update');
+        Route::post('/programmes/{programme}/validate', [CoachDashboardController::class, 'validateProgramme'])->name('coach.programmes.validate');
+        Route::post('/programmes/{programme}/publish', [CoachDashboardController::class, 'publishProgramme'])->name('coach.programmes.publish');
     });
 
     Route::prefix('member')->middleware('role:member')->group(function (): void {
         Route::get('/dashboard', [MemberDashboardController::class, 'index'])->name('member.dashboard');
         Route::put('/workout-sessions/{workoutSession}/completion', [MemberDashboardController::class, 'completeWorkout'])
             ->name('member.workouts.complete');
+        Route::put('/workout-sessions/{workoutSession}/missed', [MemberDashboardController::class, 'missWorkout'])
+            ->name('member.workouts.missed');
     });
 });

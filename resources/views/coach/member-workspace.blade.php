@@ -1,0 +1,67 @@
+<x-layouts.app title="{{ $member->user->prenom }} | GymFlow" heading="Member workspace">
+    <div class="dashboard-wrap narrow-wrap">
+        <section class="dashboard-intro">
+            <div>
+                <p class="eyebrow">Coaching workspace</p>
+                <h2>{{ $member->user->prenom }} {{ $member->user->nom }}</h2>
+                <p>Build the context first, then generate and review a programme before it reaches the member.</p>
+            </div>
+            <a class="button button-secondary" href="{{ route('coach.dashboard') }}#members">Back to members</a>
+        </section>
+
+        <section class="stat-grid coach-member-stats" aria-label="Member progress">
+            <article class="stat-card"><span>Sessions</span><strong>{{ $progress['completed_sessions'] }}/{{ $progress['total_sessions'] }}</strong><small>Completed workouts</small></article>
+            <article class="stat-card stat-teal"><span>Completion</span><strong>{{ $progress['completion_rate'] }}%</strong><small>Across current history</small></article>
+            <article class="stat-card stat-coral"><span>Hard sessions</span><strong>{{ $progress['difficulty']['difficile'] }}</strong><small>Useful coaching signal</small></article>
+            <article class="stat-card stat-gold"><span>Profile</span><strong>{{ $member->sportProfile ? 'Ready' : 'Needed' }}</strong><small>Required for AI generation</small></article>
+        </section>
+
+        <section class="panel management-form" id="profile">
+            <div class="section-heading"><p class="eyebrow">Step 1</p><h2>Sport profile</h2><p>Use the member's real context. This is the information sent to the programme generator.</p></div>
+            <form method="POST" action="{{ route('coach.members.sport-profile.update', $member) }}" class="form-grid">
+                @csrf @method('PUT')
+                <label>Goal<input name="objectif" value="{{ old('objectif', $member->sportProfile?->objectif) }}" required></label>
+                <label>Level<select name="niveau" required><option value="">Choose level</option>@foreach (['debutant' => 'Beginner', 'intermediaire' => 'Intermediate', 'avance' => 'Advanced'] as $value => $label)<option value="{{ $value }}" @selected(old('niveau', $member->sportProfile?->niveau) === $value)>{{ $label }}</option>@endforeach</select></label>
+                <label>Weight (kg)<input name="poids" type="number" min="0" step="0.01" value="{{ old('poids', $member->sportProfile?->poids) }}"></label>
+                <label>Height (cm)<input name="taille" type="number" min="0" step="0.01" value="{{ old('taille', $member->sportProfile?->taille) }}"></label>
+                <label class="form-span-2">Injuries or constraints<textarea name="blessures" rows="3" placeholder="e.g. sensitive knee, no jumping">{{ old('blessures', $member->sportProfile?->blessures) }}</textarea></label>
+                <fieldset class="form-span-2 choice-field"><legend>Available days</legend><div class="choice-list">@foreach (['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as $day)<label><input type="checkbox" name="jours_disponibles[]" value="{{ strtolower($day) }}" @checked(in_array(strtolower($day), old('jours_disponibles', $member->sportProfile?->jours_disponibles ?? [])))><span>{{ $day }}</span></label>@endforeach</div></fieldset>
+                <label class="form-span-2">Preferences<textarea name="preferences" rows="3" required placeholder="Equipment, cardio preference, exercises to avoid...">{{ old('preferences', is_array($member->sportProfile?->preferences) ? implode(', ', $member->sportProfile->preferences) : $member->sportProfile?->preferences) }}</textarea></label>
+                <div class="form-actions form-span-2"><button class="button button-primary" type="submit">Save sport profile</button></div>
+            </form>
+        </section>
+
+        <section class="panel generation-panel" id="generation">
+            <div><p class="eyebrow">Step 2</p><h2>AI programme draft</h2><p>GymFlow queues a draft from the saved profile. The coach always reviews it before publishing.</p></div>
+            <form method="POST" action="{{ route('coach.members.ai-generations.store', $member) }}">@csrf<button class="button button-primary" type="submit" @disabled(! $member->sportProfile)>Generate programme</button></form>
+        </section>
+
+        @if ($member->aiGenerations->isNotEmpty())
+            <section class="generation-history"><p class="eyebrow">Generation history</p><div class="generation-list">@foreach ($member->aiGenerations as $generation)<span><strong>{{ ucfirst(str_replace('_', ' ', $generation->statut)) }}</strong><small>{{ $generation->generee_le?->format('d M, H:i') }}</small></span>@endforeach</div></section>
+        @endif
+
+        <section class="programme-workspace" id="programmes">
+            <div class="section-heading"><p class="eyebrow">Step 3</p><h2>Review and publish</h2><p>A draft can be renamed and scheduled before validation. Published programmes become visible to the member.</p></div>
+            @forelse ($member->programmes as $programme)
+                <article class="panel programme-review-card">
+                    <div class="panel-heading"><div><span class="status-pill {{ $programme->statut === 'publie' ? 'status-good' : 'status-review' }}">{{ ucfirst($programme->statut) }}</span><h2>{{ $programme->titre }}</h2><p class="muted-copy">{{ ucfirst($programme->source) }} programme / {{ $programme->sessions->count() }} sessions</p></div></div>
+                    @if ($programme->statut === 'brouillon')
+                        <form method="POST" action="{{ route('coach.programmes.update', $programme) }}" class="form-grid programme-meta-form">@csrf @method('PUT')
+                            <label class="form-span-2">Programme name<input name="titre" value="{{ old('titre', $programme->titre) }}" required></label>
+                            <label>Starts<input name="date_debut" type="date" value="{{ old('date_debut', $programme->date_debut?->format('Y-m-d')) }}"></label>
+                            <label>Ends<input name="date_fin" type="date" value="{{ old('date_fin', $programme->date_fin?->format('Y-m-d')) }}"></label>
+                            <div class="form-actions form-span-2"><button class="button button-secondary" type="submit">Save programme details</button></div>
+                        </form>
+                    @endif
+                    <div class="programme-session-preview">@foreach ($programme->sessions->sortBy('ordre') as $session)<div><strong>{{ $session->jour }}</strong><span>{{ $session->exerciseDetails->sortBy('ordre')->map(fn ($detail) => $detail->exercise->nom)->join(', ') }}</span></div>@endforeach</div>
+                    <div class="review-actions">
+                        @if ($programme->statut === 'brouillon')<form method="POST" action="{{ route('coach.programmes.validate', $programme) }}">@csrf<button class="button button-primary" type="submit">Validate programme</button></form>@endif
+                        @if ($programme->statut === 'valide')<form method="POST" action="{{ route('coach.programmes.publish', $programme) }}">@csrf<button class="button button-primary" type="submit">Publish for member</button></form>@endif
+                    </div>
+                </article>
+            @empty
+                <div class="empty-state panel"><strong>No programme yet.</strong><span>Save the sport profile, then generate an AI draft for review.</span></div>
+            @endforelse
+        </section>
+    </div>
+</x-layouts.app>
