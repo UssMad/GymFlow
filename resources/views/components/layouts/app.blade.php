@@ -15,6 +15,7 @@
                         'admin' => [
                             ['label' => 'Overview', 'href' => route('admin.dashboard').'#overview'],
                             ['label' => 'Members', 'href' => route('admin.dashboard').'#members'],
+                            ['label' => 'Coaches', 'href' => route('admin.dashboard').'#coaches'],
                             ['label' => 'Attendance', 'href' => route('admin.dashboard').'#attendance'],
                         ],
                         'coach' => [

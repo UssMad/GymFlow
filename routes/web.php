@@ -23,6 +23,10 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/members', [AdminDashboardController::class, 'storeMember'])->name('admin.members.store');
         Route::get('/members/{member}/edit', [AdminDashboardController::class, 'editMember'])->name('admin.members.edit');
         Route::put('/members/{member}', [AdminDashboardController::class, 'updateMember'])->name('admin.members.update');
+        Route::get('/coaches/create', [AdminDashboardController::class, 'createCoach'])->name('admin.coaches.create');
+        Route::post('/coaches', [AdminDashboardController::class, 'storeCoach'])->name('admin.coaches.store');
+        Route::get('/coaches/{coach}/edit', [AdminDashboardController::class, 'editCoach'])->name('admin.coaches.edit');
+        Route::put('/coaches/{coach}', [AdminDashboardController::class, 'updateCoach'])->name('admin.coaches.update');
         Route::post('/members/{member}/subscriptions', [AdminDashboardController::class, 'storeSubscription'])->name('admin.members.subscriptions.store');
         Route::post('/subscription-plans', [AdminDashboardController::class, 'storeSubscriptionPlan'])->name('admin.subscription-plans.store');
         Route::post('/members/{member}/attendance', [AdminDashboardController::class, 'storeAttendance'])->name('admin.attendance.store');

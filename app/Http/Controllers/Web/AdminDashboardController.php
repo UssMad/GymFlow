@@ -47,9 +47,11 @@ class AdminDashboardController extends Controller
             ->latest('date_presence')
             ->latest('id')
             ->get();
+        $coaches = $this->coaches();
 
         return view('admin.dashboard', [
             'members' => $members,
+            'coaches' => $coaches,
             'todayAttendances' => $todayAttendances,
             'attendanceHistory' => $attendanceHistory,
             'filters' => $filters,
@@ -57,7 +59,7 @@ class AdminDashboardController extends Controller
                 'members' => $members->count(),
                 'activeMembers' => $members->where('statut_abonnement', 'actif')->count(),
                 'checkedIn' => $todayAttendances->count(),
-                'coaches' => Coach::query()->count(),
+                'coaches' => $coaches->count(),
             ],
         ]);
     }
@@ -137,6 +139,59 @@ class AdminDashboardController extends Controller
         return back()->with('status', 'Member details saved.');
     }
 
+    public function createCoach(): View
+    {
+        return view('admin.coaches.create');
+    }
+
+    public function storeCoach(Request $request): RedirectResponse
+    {
+        $data = $this->validateCoach($request);
+
+        $coach = DB::transaction(function () use ($data): Coach {
+            $user = User::query()->create([
+                'nom' => $data['nom'],
+                'prenom' => $data['prenom'],
+                'email' => $data['email'],
+                'password' => Hash::make($data['password']),
+                'role' => 'coach',
+            ]);
+
+            return Coach::query()->create([
+                'user_id' => $user->id,
+                'specialite' => $data['specialite'] ?: null,
+                'disponibilite' => $data['disponibilite'] ?: null,
+            ]);
+        });
+
+        return redirect()->route('admin.coaches.edit', $coach)
+            ->with('status', 'Coach account created. You can now assign members to this coach.');
+    }
+
+    public function editCoach(Coach $coach): View
+    {
+        return view('admin.coaches.edit', ['coach' => $coach->load('user')]);
+    }
+
+    public function updateCoach(Request $request, Coach $coach): RedirectResponse
+    {
+        $data = $this->validateCoach($request, $coach);
+
+        DB::transaction(function () use ($coach, $data): void {
+            $userData = collect($data)->only(['nom', 'prenom', 'email'])->all();
+            if (filled($data['password'] ?? null)) {
+                $userData['password'] = Hash::make($data['password']);
+            }
+            $coach->user->update($userData);
+            $coach->update([
+                'specialite' => $data['specialite'] ?: null,
+                'disponibilite' => $data['disponibilite'] ?: null,
+            ]);
+        });
+
+        return back()->with('status', 'Coach details saved.');
+    }
+
     public function storeSubscription(Request $request, Member $member): RedirectResponse
     {
         $data = $request->validate([
@@ -175,7 +230,7 @@ class AdminDashboardController extends Controller
 
     private function coaches()
     {
-        return Coach::query()->with('user')->orderBy('id')->get();
+        return Coach::query()->with('user')->withCount('members')->orderBy('id')->get();
     }
 
     private function validateMember(Request $request, ?Member $member = null): array
@@ -192,6 +247,22 @@ class AdminDashboardController extends Controller
             'coach_id' => ['nullable', 'integer', Rule::exists('coaches', 'id')],
             'date_inscription' => ['required', 'date'],
             'statut_abonnement' => ['required', 'in:actif,expire,suspendu'],
+        ]);
+    }
+
+    private function validateCoach(Request $request, ?Coach $coach = null): array
+    {
+        $password = $coach
+            ? ['nullable', 'confirmed', 'min:12']
+            : ['required', 'confirmed', 'min:12'];
+
+        return $request->validate([
+            'nom' => ['required', 'string', 'max:255'],
+            'prenom' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($coach?->user_id)],
+            'password' => $password,
+            'specialite' => ['nullable', 'string', 'max:255'],
+            'disponibilite' => ['nullable', 'string', 'max:1000'],
         ]);
     }
 }

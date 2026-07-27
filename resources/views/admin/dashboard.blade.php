@@ -71,5 +71,32 @@
                 @endforelse
             </aside>
         </section>
+
+        <section class="panel coach-directory" id="coaches">
+            <div class="panel-heading">
+                <div><p class="eyebrow">Coaching team</p><h2>Coach accounts</h2></div>
+                <a class="button button-small button-primary" href="{{ route('admin.coaches.create') }}">Add coach</a>
+            </div>
+            @if ($coaches->isEmpty())
+                <div class="empty-state"><strong>No coaches yet.</strong><span>Create a coach account before assigning members to a coach.</span></div>
+            @else
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Coach</th><th>Speciality</th><th>Availability</th><th>Assigned members</th><th></th></tr></thead>
+                        <tbody>
+                            @foreach ($coaches as $coach)
+                                <tr>
+                                    <td><strong>{{ $coach->user->prenom }} {{ $coach->user->nom }}</strong><small>{{ $coach->user->email }}</small></td>
+                                    <td>{{ $coach->specialite ?: 'Not specified' }}</td>
+                                    <td>{{ $coach->disponibilite ?: 'Not specified' }}</td>
+                                    <td>{{ $coach->members_count }}</td>
+                                    <td><a class="table-link" href="{{ route('admin.coaches.edit', $coach) }}">Manage</a></td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </section>
     </div>
 </x-layouts.app>
