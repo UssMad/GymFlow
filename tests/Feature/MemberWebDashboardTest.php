@@ -48,3 +48,24 @@ it('does not allow a coach to use the member dashboard', function () {
 
     $this->actingAs($coach)->get('/member/dashboard')->assertForbidden();
 });
+
+it('lets a member mark a planned workout as missed with a reason', function () {
+    $member = Member::query()->create(['user_id' => User::factory()->create(['role' => 'member'])->id]);
+    $programme = Programme::query()->create([
+        'membre_id' => $member->id,
+        'titre' => 'Recovery week',
+        'source' => 'manuel',
+        'statut' => 'publie',
+    ]);
+    $session = $programme->sessions()->create(['jour' => 'Thursday', 'ordre' => 1]);
+
+    $this->actingAs($member->user)
+        ->put(route('member.workouts.missed', $session), ['raison_non_realisation' => 'Knee discomfort.'])
+        ->assertSessionHas('status', 'Thursday is marked as missed.');
+
+    $this->assertDatabaseHas('workout_sessions', [
+        'id' => $session->id,
+        'statut' => 'non_realise',
+        'raison_non_realisation' => 'Knee discomfort.',
+    ]);
+});
