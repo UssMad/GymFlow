@@ -1,7 +1,34 @@
 <?php
 
+use App\Http\Controllers\Web\AdminDashboardController;
+use App\Http\Controllers\Web\CoachDashboardController;
+use App\Http\Controllers\Web\MemberDashboardController;
+use App\Http\Controllers\Web\WebAuthController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get('/', [WebAuthController::class, 'home'])->name('home');
+
+Route::middleware('guest')->group(function (): void {
+    Route::get('/login', [WebAuthController::class, 'create'])->name('login');
+    Route::post('/login', [WebAuthController::class, 'store'])->name('login.store');
+});
+
+Route::middleware('auth')->group(function (): void {
+    Route::get('/dashboard', [WebAuthController::class, 'dashboard'])->name('dashboard');
+    Route::post('/logout', [WebAuthController::class, 'destroy'])->name('logout');
+
+    Route::prefix('admin')->middleware('role:admin')->group(function (): void {
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+        Route::post('/members/{member}/attendance', [AdminDashboardController::class, 'storeAttendance'])->name('admin.attendance.store');
+    });
+
+    Route::prefix('coach')->middleware('role:coach')->group(function (): void {
+        Route::get('/dashboard', [CoachDashboardController::class, 'index'])->name('coach.dashboard');
+    });
+
+    Route::prefix('member')->middleware('role:member')->group(function (): void {
+        Route::get('/dashboard', [MemberDashboardController::class, 'index'])->name('member.dashboard');
+        Route::put('/workout-sessions/{workoutSession}/completion', [MemberDashboardController::class, 'completeWorkout'])
+            ->name('member.workouts.complete');
+    });
 });

@@ -18,6 +18,7 @@ class WorkoutSession extends Model
         'notes',
         'realisee_le',
         'retour_membre',
+        'difficulte_ressentie',
         'raison_non_realisation',
     ];
 

@@ -15,6 +15,10 @@ class WorkoutSessionResource extends JsonResource
             'ordre' => $this->ordre,
             'statut' => $this->statut,
             'notes' => $this->notes,
+            'realisee_le' => $this->realisee_le,
+            'retour_membre' => $this->retour_membre,
+            'difficulte_ressentie' => $this->difficulte_ressentie,
+            'raison_non_realisation' => $this->raison_non_realisation,
             'exercices' => $this->whenLoaded('exerciseDetails', fn () => $this->exerciseDetails->map(fn ($detail): array => [
                 'id' => $detail->id,
                 'ordre' => $detail->ordre,

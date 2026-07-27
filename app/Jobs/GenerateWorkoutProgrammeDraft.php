@@ -3,6 +3,8 @@
 namespace App\Jobs;
 
 use App\Ai\Agents\WorkoutProgrammeGenerator;
+use App\Ai\Prompts\WorkoutProgrammePrompt;
+use App\Ai\Validators\WorkoutProgrammeDraftValidator;
 use App\Models\AiGeneration;
 use App\Models\Exercise;
 use App\Models\ExerciseDetail;
@@ -11,7 +13,9 @@ use App\Models\WorkoutSession;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Throwable;
 
 class GenerateWorkoutProgrammeDraft implements ShouldQueue
@@ -20,7 +24,7 @@ class GenerateWorkoutProgrammeDraft implements ShouldQueue
 
     public function __construct(public int $generationId) {}
 
-    public function handle(WorkoutProgrammeGenerator $agent): void
+    public function handle(WorkoutProgrammeGenerator $agent, WorkoutProgrammeDraftValidator $validator): void
     {
         $generation = AiGeneration::query()->find($this->generationId);
 
@@ -29,7 +33,8 @@ class GenerateWorkoutProgrammeDraft implements ShouldQueue
         }
 
         try {
-            $draft = $agent->prompt($this->promptFor($generation->contexte_utilise))->toArray();
+            $draft = $agent->prompt(WorkoutProgrammePrompt::for(WorkoutProgrammePrompt::context($generation->contexte_utilise)))->toArray();
+            $validator->validate($draft);
 
             DB::transaction(function () use ($generation, $draft): void {
                 $programme = Programme::query()->create([
@@ -80,17 +85,27 @@ class GenerateWorkoutProgrammeDraft implements ShouldQueue
                     'reponse_brute' => $draft,
                 ]);
             });
-        } catch (Throwable $exception) {
+        } catch (InvalidArgumentException $exception) {
             $generation->update([
                 'statut' => 'echec',
-                'reponse_brute' => ['error' => $exception->getMessage()],
+                'reponse_brute' => [
+                    'error_code' => 'invalid_response',
+                    'error' => $exception->getMessage(),
+                ],
+            ]);
+        } catch (Throwable $exception) {
+            Log::warning('AI workout programme generation failed.', [
+                'generation_id' => $generation->id,
+                'exception' => $exception,
+            ]);
+
+            $generation->update([
+                'statut' => 'echec',
+                'reponse_brute' => [
+                    'error_code' => 'generation_failed',
+                    'error' => 'AI generation failed. Please try again or review the member profile.',
+                ],
             ]);
         }
-    }
-
-    private function promptFor(array $context): string
-    {
-        return 'Generate a weekly coach-review workout draft from this member profile JSON: '
-            .json_encode($context, JSON_THROW_ON_ERROR);
     }
 }
