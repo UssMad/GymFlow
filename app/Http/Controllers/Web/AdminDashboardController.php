@@ -6,9 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\Coach;
 use App\Models\Member;
+use App\Models\MemberSubscription;
+use App\Models\SubscriptionPlan;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -93,8 +96,9 @@ class AdminDashboardController extends Controller
     public function editMember(Member $member): View
     {
         return view('admin.members.edit', [
-            'member' => $member->load(['user', 'coach.user']),
+            'member' => $member->load(['user', 'coach.user', 'subscriptions.subscriptionPlan']),
             'coaches' => $this->coaches(),
+            'subscriptionPlans' => SubscriptionPlan::query()->where('actif', true)->orderBy('duree_jours')->get(),
         ]);
     }
 
@@ -116,6 +120,42 @@ class AdminDashboardController extends Controller
         });
 
         return back()->with('status', 'Member details saved.');
+    }
+
+    public function storeSubscription(Request $request, Member $member): RedirectResponse
+    {
+        $data = $request->validate([
+            'subscription_plan_id' => ['required', 'integer', Rule::exists('subscription_plans', 'id')->where('actif', true)],
+            'date_debut' => ['required', 'date'],
+            'date_fin' => ['required', 'date', 'after_or_equal:date_debut'],
+        ]);
+        $status = Carbon::parse($data['date_fin'])->lt(today()) ? 'expire' : 'actif';
+
+        DB::transaction(function () use ($member, $data, $status): void {
+            MemberSubscription::query()->create([
+                'member_id' => $member->id,
+                'subscription_plan_id' => $data['subscription_plan_id'],
+                'date_debut' => $data['date_debut'],
+                'date_fin' => $data['date_fin'],
+                'statut' => $status,
+            ]);
+            $member->update(['statut_abonnement' => $status]);
+        });
+
+        return back()->with('status', 'Subscription assigned to member.');
+    }
+
+    public function storeSubscriptionPlan(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'nom' => ['required', 'string', 'max:255', 'unique:subscription_plans,nom'],
+            'duree_jours' => ['required', 'integer', 'min:1', 'max:3650'],
+            'description' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        SubscriptionPlan::query()->create([...$data, 'actif' => true]);
+
+        return back()->with('status', 'Subscription plan created.');
     }
 
     private function coaches()

@@ -23,6 +23,8 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/members', [AdminDashboardController::class, 'storeMember'])->name('admin.members.store');
         Route::get('/members/{member}/edit', [AdminDashboardController::class, 'editMember'])->name('admin.members.edit');
         Route::put('/members/{member}', [AdminDashboardController::class, 'updateMember'])->name('admin.members.update');
+        Route::post('/members/{member}/subscriptions', [AdminDashboardController::class, 'storeSubscription'])->name('admin.members.subscriptions.store');
+        Route::post('/subscription-plans', [AdminDashboardController::class, 'storeSubscriptionPlan'])->name('admin.subscription-plans.store');
         Route::post('/members/{member}/attendance', [AdminDashboardController::class, 'storeAttendance'])->name('admin.attendance.store');
     });
 
