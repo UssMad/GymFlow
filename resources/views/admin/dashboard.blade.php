@@ -54,14 +54,20 @@
             </article>
 
             <aside class="panel attendance-panel" id="attendance">
-                <div class="panel-heading"><div><p class="eyebrow">Attendance log</p><h2>On the floor</h2></div></div>
-                @forelse ($todayAttendances as $attendance)
+                <div class="panel-heading"><div><p class="eyebrow">Attendance log</p><h2>Attendance history</h2></div></div>
+                <form class="attendance-filter" method="GET" action="{{ route('admin.dashboard') }}#attendance">
+                    <label><span>Member</span><select name="membre_id"><option value="">All members</option>@foreach ($members as $member)<option value="{{ $member->id }}" @selected((string) ($filters['membre_id'] ?? '') === (string) $member->id)>{{ $member->user->prenom }} {{ $member->user->nom }}</option>@endforeach</select></label>
+                    <label><span>From</span><input type="date" name="date_debut" value="{{ $filters['date_debut'] ?? '' }}"></label>
+                    <label><span>To</span><input type="date" name="date_fin" value="{{ $filters['date_fin'] ?? '' }}"></label>
+                    <div class="attendance-filter-actions"><a href="{{ route('admin.dashboard') }}#attendance">Clear</a><button class="button button-small button-secondary" type="submit">Filter</button></div>
+                </form>
+                @forelse ($attendanceHistory as $attendance)
                     <div class="attendance-item">
                         <span class="avatar">{{ strtoupper(substr($attendance->member->user->prenom, 0, 1)) }}{{ strtoupper(substr($attendance->member->user->nom, 0, 1)) }}</span>
-                        <span><strong>{{ $attendance->member->user->prenom }} {{ $attendance->member->user->nom }}</strong><small>{{ $attendance->enregistre_le?->format('H:i') ?? 'Checked in' }}</small></span>
+                        <span><strong>{{ $attendance->member->user->prenom }} {{ $attendance->member->user->nom }}</strong><small>{{ $attendance->date_presence->format('d M Y') }} / {{ $attendance->enregistre_le?->format('H:i') ?? 'Checked in' }}</small></span>
                     </div>
                 @empty
-                    <div class="empty-state compact"><strong>No check-ins yet.</strong><span>Use the member directory to record the first arrival.</span></div>
+                    <div class="empty-state compact"><strong>No matching attendance.</strong><span>Use the member directory to record a check-in or adjust the filters.</span></div>
                 @endforelse
             </aside>
         </section>

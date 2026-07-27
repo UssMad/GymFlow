@@ -19,8 +19,13 @@ use Illuminate\View\View;
 
 class AdminDashboardController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $filters = $request->validate([
+            'membre_id' => ['nullable', 'integer', Rule::exists('members', 'id')],
+            'date_debut' => ['nullable', 'date'],
+            'date_fin' => ['nullable', 'date', 'after_or_equal:date_debut'],
+        ]);
         $members = Member::query()
             ->with(['user', 'coach.user'])
             ->withCount([
@@ -34,10 +39,20 @@ class AdminDashboardController extends Controller
             ->whereDate('date_presence', today())
             ->latest('enregistre_le')
             ->get();
+        $attendanceHistory = Attendance::query()
+            ->with('member.user')
+            ->when($filters['membre_id'] ?? null, fn ($query, $memberId) => $query->where('membre_id', $memberId))
+            ->when($filters['date_debut'] ?? null, fn ($query, $date) => $query->whereDate('date_presence', '>=', $date))
+            ->when($filters['date_fin'] ?? null, fn ($query, $date) => $query->whereDate('date_presence', '<=', $date))
+            ->latest('date_presence')
+            ->latest('id')
+            ->get();
 
         return view('admin.dashboard', [
             'members' => $members,
             'todayAttendances' => $todayAttendances,
+            'attendanceHistory' => $attendanceHistory,
+            'filters' => $filters,
             'stats' => [
                 'members' => $members->count(),
                 'activeMembers' => $members->where('statut_abonnement', 'actif')->count(),
