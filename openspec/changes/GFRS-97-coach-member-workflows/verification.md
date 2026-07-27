@@ -8,5 +8,5 @@
 
 ## Verification
 
-- `php artisan test` - 73 tests passed, 289 assertions.
+- `php artisan test` - 74 tests passed, 289 assertions.
 - `npm run build` - production assets built successfully.
