@@ -1,5 +1,5 @@
 <x-layouts.app title="Coach dashboard | GymFlow" heading="Coaching desk">
-    <div class="dashboard-wrap">
+    <div class="dashboard-wrap" id="overview">
         <section class="dashboard-intro">
             <div>
                 <p class="eyebrow">Your coaching roster</p>
@@ -17,7 +17,7 @@
         </section>
 
         <section class="content-grid coach-grid">
-            <article class="panel panel-wide">
+            <article class="panel panel-wide" id="members">
                 <div class="panel-heading"><div><p class="eyebrow">Member progress</p><h2>Consistency board</h2></div><span class="count-label">{{ $members->count() }} members</span></div>
                 @forelse ($members as $member)
                     @php($summary = $progressByMember->get($member->id))
@@ -37,7 +37,7 @@
                 @endforelse
             </article>
 
-            <aside class="panel review-panel">
+            <aside class="panel review-panel" id="programmes">
                 <div class="panel-heading"><div><p class="eyebrow">Programme queue</p><h2>Review next</h2></div></div>
                 @forelse ($programmesForReview as $programme)
                     <div class="review-item">

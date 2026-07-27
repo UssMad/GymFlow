@@ -1,5 +1,5 @@
 <x-layouts.app title="Admin dashboard | GymFlow" heading="Gym pulse">
-    <div class="dashboard-wrap">
+    <div class="dashboard-wrap" id="overview">
         <section class="dashboard-intro">
             <div>
                 <p class="eyebrow">Today / {{ now()->format('d M Y') }}</p>
@@ -17,7 +17,7 @@
         </section>
 
         <section class="content-grid admin-grid">
-            <article class="panel panel-wide">
+            <article class="panel panel-wide" id="members">
                 <div class="panel-heading">
                     <div><p class="eyebrow">Member directory</p><h2>Today’s check-in</h2></div>
                     <span class="count-label">{{ $members->count() }} members</span>
@@ -52,7 +52,7 @@
                 @endif
             </article>
 
-            <aside class="panel attendance-panel">
+            <aside class="panel attendance-panel" id="attendance">
                 <div class="panel-heading"><div><p class="eyebrow">Attendance log</p><h2>On the floor</h2></div></div>
                 @forelse ($todayAttendances as $attendance)
                     <div class="attendance-item">
