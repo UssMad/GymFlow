@@ -8,7 +8,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body>
-        <div class="app-shell">
+        <div class="app-shell {{ auth()->check() ? '' : 'app-shell-auth' }}">
             @auth
                 <aside class="sidebar" aria-label="Main navigation">
                     <a class="brand" href="{{ route('dashboard') }}" aria-label="GymFlow dashboard">
