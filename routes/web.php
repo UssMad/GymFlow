@@ -19,6 +19,10 @@ Route::middleware('auth')->group(function (): void {
 
     Route::prefix('admin')->middleware('role:admin')->group(function (): void {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+        Route::get('/members/create', [AdminDashboardController::class, 'createMember'])->name('admin.members.create');
+        Route::post('/members', [AdminDashboardController::class, 'storeMember'])->name('admin.members.store');
+        Route::get('/members/{member}/edit', [AdminDashboardController::class, 'editMember'])->name('admin.members.edit');
+        Route::put('/members/{member}', [AdminDashboardController::class, 'updateMember'])->name('admin.members.update');
         Route::post('/members/{member}/attendance', [AdminDashboardController::class, 'storeAttendance'])->name('admin.attendance.store');
     });
 

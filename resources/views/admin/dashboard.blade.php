@@ -20,14 +20,14 @@
             <article class="panel panel-wide" id="members">
                 <div class="panel-heading">
                     <div><p class="eyebrow">Member directory</p><h2>Today’s check-in</h2></div>
-                    <span class="count-label">{{ $members->count() }} members</span>
+                    <a class="button button-small button-primary" href="{{ route('admin.members.create') }}">Add member</a>
                 </div>
                 @if ($members->isEmpty())
                     <div class="empty-state"><strong>No members yet.</strong><span>Add members through the admin API to begin tracking attendance.</span></div>
                 @else
                     <div class="table-wrap">
                         <table>
-                            <thead><tr><th>Member</th><th>Coach</th><th>Membership</th><th>Attendance</th></tr></thead>
+                            <thead><tr><th>Member</th><th>Coach</th><th>Membership</th><th>Attendance</th><th></th></tr></thead>
                             <tbody>
                                 @foreach ($members as $member)
                                     <tr>
@@ -44,6 +44,7 @@
                                                 </form>
                                             @endif
                                         </td>
+                                        <td><a class="table-link" href="{{ route('admin.members.edit', $member) }}">Manage</a></td>
                                     </tr>
                                 @endforeach
                             </tbody>
