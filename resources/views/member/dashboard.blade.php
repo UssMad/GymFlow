@@ -1,5 +1,5 @@
 <x-layouts.app title="My programme | GymFlow" heading="My training">
-    <div class="dashboard-wrap">
+    <div class="dashboard-wrap" id="overview">
         <section class="dashboard-intro member-intro">
             <div>
                 <p class="eyebrow">Your training space</p>
@@ -12,7 +12,7 @@
         </section>
 
         @if ($programme)
-            <section class="member-progress-band" aria-label="Programme completion">
+            <section class="member-progress-band" id="programme" aria-label="Programme completion">
                 <div><p class="eyebrow">{{ $programme->titre }}</p><strong>{{ $stats['progress'] }}% complete</strong></div>
                 <div class="member-progress-track"><span style="width: {{ $stats['progress'] }}%"></span></div>
                 <span>{{ $stats['completed'] }} of {{ $stats['total'] }} sessions</span>
@@ -49,11 +49,11 @@
                 @endforeach
             </section>
         @else
-            <section class="panel empty-programme"><p class="eyebrow">Nothing published yet</p><h2>Your coach is shaping your next programme.</h2><p>A published programme will appear here with your sessions and exercises.</p></section>
+            <section class="panel empty-programme" id="programme"><p class="eyebrow">Nothing published yet</p><h2>Your coach is shaping your next programme.</h2><p>A published programme will appear here with your sessions and exercises.</p></section>
         @endif
 
         @if ($history->isNotEmpty())
-            <section class="history-section"><div><p class="eyebrow">Past programmes</p><h2>Training history</h2></div><div class="history-list">@foreach ($history as $pastProgramme)<span>{{ $pastProgramme->titre }} <small>{{ $pastProgramme->date_fin->format('M Y') }}</small></span>@endforeach</div></section>
+            <section class="history-section" id="history"><div><p class="eyebrow">Past programmes</p><h2>Training history</h2></div><div class="history-list">@foreach ($history as $pastProgramme)<span>{{ $pastProgramme->titre }} <small>{{ $pastProgramme->date_fin->format('M Y') }}</small></span>@endforeach</div></section>
         @endif
     </div>
 </x-layouts.app>

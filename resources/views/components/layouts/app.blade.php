@@ -10,6 +10,25 @@
     <body>
         <div class="app-shell {{ auth()->check() ? '' : 'app-shell-auth' }}">
             @auth
+                @php
+                    $navigation = match (auth()->user()->role) {
+                        'admin' => [
+                            ['label' => 'Overview', 'href' => route('admin.dashboard').'#overview'],
+                            ['label' => 'Members', 'href' => route('admin.dashboard').'#members'],
+                            ['label' => 'Attendance', 'href' => route('admin.dashboard').'#attendance'],
+                        ],
+                        'coach' => [
+                            ['label' => 'Overview', 'href' => route('coach.dashboard').'#overview'],
+                            ['label' => 'Members', 'href' => route('coach.dashboard').'#members'],
+                            ['label' => 'Programmes', 'href' => route('coach.dashboard').'#programmes'],
+                        ],
+                        default => [
+                            ['label' => 'Overview', 'href' => route('member.dashboard').'#overview'],
+                            ['label' => 'My programme', 'href' => route('member.dashboard').'#programme'],
+                            ['label' => 'History', 'href' => route('member.dashboard').'#history'],
+                        ],
+                    };
+                @endphp
                 <aside class="sidebar" aria-label="Main navigation">
                     <a class="brand" href="{{ route('dashboard') }}" aria-label="GymFlow dashboard">
                         <span class="brand-mark">GF</span>
@@ -18,9 +37,9 @@
 
                     <div class="sidebar-label">{{ ucfirst(auth()->user()->role) }} workspace</div>
                     <nav class="nav-list">
-                        <a class="nav-link {{ request()->routeIs('*dashboard') ? 'is-active' : '' }}" href="{{ route('dashboard') }}">
-                            <span aria-hidden="true">Overview</span>
-                        </a>
+                        @foreach ($navigation as $index => $item)
+                            <a class="nav-link {{ $index === 0 ? 'is-active' : '' }}" href="{{ $item['href'] }}">{{ $item['label'] }}</a>
+                        @endforeach
                     </nav>
 
                     <div class="sidebar-footer">
