@@ -22,7 +22,7 @@
                     </div>
                     <div class="programme-session-preview">
                         @foreach ($programme->sessions->sortBy('ordre') as $session)
-                            <div><strong>{{ $session->jour }}</strong><span>{{ $session->exerciseDetails->sortBy('ordre')->map(fn ($detail) => $detail->exercise->nom)->join(', ') ?: 'Exercises pending' }}</span></div>
+                            <div><strong>{{ $session->jour }}</strong><span class="exercise-thumbnail-list">@forelse ($session->exerciseDetails->sortBy('ordre') as $detail)<span class="exercise-thumbnail-item"><img src="{{ $detail->exercise->resolvedImageUrl() }}" alt="{{ $detail->exercise->nom }}" loading="lazy"><span>{{ $detail->exercise->nom }}</span></span>@empty Exercises pending @endforelse</span></div>
                         @endforeach
                     </div>
                 </article>

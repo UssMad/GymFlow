@@ -29,8 +29,8 @@
                         <div class="exercise-list">
                             @foreach ($session->exerciseDetails->sortBy('ordre') as $detail)
                                 <div class="exercise-row">
-                                    <strong>{{ $detail->exercise->nom }}</strong>
-                                    <span>{{ collect([$detail->series ? $detail->series.' sets' : null, $detail->repetitions ? $detail->repetitions.' reps' : null, $detail->duree_cardio ? $detail->duree_cardio.' min' : null])->filter()->join(' / ') ?: 'See coach notes' }}</span>
+                                    <img class="exercise-thumbnail" src="{{ $detail->exercise->resolvedImageUrl() }}" alt="{{ $detail->exercise->nom }}" loading="lazy">
+                                    <div class="exercise-copy"><strong>{{ $detail->exercise->nom }}</strong><span>{{ collect([$detail->series ? $detail->series.' sets' : null, $detail->repetitions ? $detail->repetitions.' reps' : null, $detail->duree_cardio ? $detail->duree_cardio.' min' : null])->filter()->join(' / ') ?: 'See coach notes' }}</span></div>
                                     @if ($detail->repos)<small>{{ $detail->repos }} rest</small>@endif
                                 </div>
                             @endforeach

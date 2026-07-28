@@ -102,7 +102,7 @@
                             <div class="form-actions form-span-2"><button class="button button-secondary" type="submit">Save programme details</button></div>
                         </form>
                     @endif
-                    <div class="programme-session-preview">@foreach ($programme->sessions->sortBy('ordre') as $session)<div><strong>{{ $session->jour }}</strong><span>{{ $session->exerciseDetails->sortBy('ordre')->map(fn ($detail) => $detail->exercise->nom)->join(', ') }}</span></div>@endforeach</div>
+                    <div class="programme-session-preview">@foreach ($programme->sessions->sortBy('ordre') as $session)<div><strong>{{ $session->jour }}</strong><span class="exercise-thumbnail-list">@foreach ($session->exerciseDetails->sortBy('ordre') as $detail)<span class="exercise-thumbnail-item"><img src="{{ $detail->exercise->resolvedImageUrl() }}" alt="{{ $detail->exercise->nom }}" loading="lazy"><span>{{ $detail->exercise->nom }}</span></span>@endforeach</span></div>@endforeach</div>
                     <div class="review-actions">
                         @if ($programme->statut === 'brouillon')<form method="POST" action="{{ route('coach.programmes.validate', $programme) }}">@csrf<button class="button button-primary" type="submit">Validate programme</button></form>@endif
                         @if ($programme->statut === 'valide')<form method="POST" action="{{ route('coach.programmes.publish', $programme) }}">@csrf<button class="button button-primary" type="submit">Publish for member</button></form>@endif
