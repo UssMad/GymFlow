@@ -19,6 +19,26 @@ use Illuminate\View\View;
 
 class AdminDashboardController extends Controller
 {
+    private const COACH_SPECIALITIES = [
+        'Strength training',
+        'Muscle building',
+        'Weight loss and conditioning',
+        'Functional training',
+        'Cardio and endurance',
+        'Mobility and flexibility',
+        'General fitness',
+    ];
+
+    private const COACH_AVAILABILITIES = [
+        'Monday to Friday',
+        'Monday, Wednesday, Friday',
+        'Tuesday, Thursday, Saturday',
+        'Weekday mornings',
+        'Weekday evenings',
+        'Saturday and Sunday',
+        'Flexible schedule',
+    ];
+
     public function index(Request $request): View
     {
         $filters = $request->validate([
@@ -141,7 +161,7 @@ class AdminDashboardController extends Controller
 
     public function createCoach(): View
     {
-        return view('admin.coaches.create');
+        return view('admin.coaches.create', $this->coachFormOptions());
     }
 
     public function storeCoach(Request $request): RedirectResponse
@@ -170,7 +190,10 @@ class AdminDashboardController extends Controller
 
     public function editCoach(Coach $coach): View
     {
-        return view('admin.coaches.edit', ['coach' => $coach->load('user')]);
+        return view('admin.coaches.edit', [
+            'coach' => $coach->load('user'),
+            ...$this->coachFormOptions(),
+        ]);
     }
 
     public function updateCoach(Request $request, Coach $coach): RedirectResponse
@@ -261,8 +284,16 @@ class AdminDashboardController extends Controller
             'prenom' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($coach?->user_id)],
             'password' => $password,
-            'specialite' => ['nullable', 'string', 'max:255'],
-            'disponibilite' => ['nullable', 'string', 'max:1000'],
+            'specialite' => ['nullable', Rule::in(self::COACH_SPECIALITIES)],
+            'disponibilite' => ['nullable', Rule::in(self::COACH_AVAILABILITIES)],
         ]);
+    }
+
+    private function coachFormOptions(): array
+    {
+        return [
+            'specialities' => self::COACH_SPECIALITIES,
+            'availabilities' => self::COACH_AVAILABILITIES,
+        ];
     }
 }

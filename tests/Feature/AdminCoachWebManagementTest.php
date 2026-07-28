@@ -11,7 +11,9 @@ it('lets an administrator create and update a coach through Blade forms', functi
 
     $this->actingAs($admin)->get(route('admin.coaches.create'))
         ->assertOk()
-        ->assertSee('Create a coach account');
+        ->assertSee('Create a coach account')
+        ->assertSee('Functional training')
+        ->assertSee('Weekday evenings');
 
     $this->actingAs($admin)->post(route('admin.coaches.store'), [
         'prenom' => 'Amine',
@@ -19,8 +21,8 @@ it('lets an administrator create and update a coach through Blade forms', functi
         'email' => 'amine.coach@example.test',
         'password' => 'very-secure-password',
         'password_confirmation' => 'very-secure-password',
-        'specialite' => 'Strength training',
-        'disponibilite' => 'Monday to Friday',
+        'specialite' => 'Functional training',
+        'disponibilite' => 'Weekday evenings',
     ])->assertRedirect();
 
     $coach = Coach::query()->whereHas('user', fn ($query) => $query->where('email', 'amine.coach@example.test'))->firstOrFail();
@@ -31,12 +33,12 @@ it('lets an administrator create and update a coach through Blade forms', functi
         'email' => 'amine.coach@example.test',
         'password' => null,
         'password_confirmation' => null,
-        'specialite' => 'Mobility and conditioning',
-        'disponibilite' => 'Tuesday to Saturday',
+        'specialite' => 'Mobility and flexibility',
+        'disponibilite' => 'Tuesday, Thursday, Saturday',
     ])->assertSessionHas('status', 'Coach details saved.');
 
     $this->assertDatabaseHas('users', ['id' => $coach->user_id, 'role' => 'coach']);
-    $this->assertDatabaseHas('coaches', ['id' => $coach->id, 'specialite' => 'Mobility and conditioning']);
+    $this->assertDatabaseHas('coaches', ['id' => $coach->id, 'specialite' => 'Mobility and flexibility']);
 });
 
 it('does not let a member access coach management', function () {
