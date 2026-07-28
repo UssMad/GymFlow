@@ -15,12 +15,13 @@
                         'admin' => [
                             ['label' => 'Overview', 'href' => route('admin.dashboard').'#overview'],
                             ['label' => 'Members', 'href' => route('admin.dashboard').'#members'],
+                            ['label' => 'Coaches', 'href' => route('admin.dashboard').'#coaches'],
                             ['label' => 'Attendance', 'href' => route('admin.dashboard').'#attendance'],
                         ],
                         'coach' => [
-                            ['label' => 'Overview', 'href' => route('coach.dashboard').'#overview'],
-                            ['label' => 'Members', 'href' => route('coach.dashboard').'#members'],
-                            ['label' => 'Programmes', 'href' => route('coach.dashboard').'#programmes'],
+                            ['label' => 'Overview', 'href' => route('coach.dashboard'), 'active' => request()->routeIs('coach.dashboard')],
+                            ['label' => 'Members', 'href' => route('coach.members.index'), 'active' => request()->routeIs('coach.members.*')],
+                            ['label' => 'Programmes', 'href' => route('coach.programmes.index'), 'active' => request()->routeIs('coach.programmes.*')],
                         ],
                         default => [
                             ['label' => 'Overview', 'href' => route('member.dashboard').'#overview'],
@@ -38,7 +39,7 @@
                     <div class="sidebar-label">{{ ucfirst(auth()->user()->role) }} workspace</div>
                     <nav class="nav-list">
                         @foreach ($navigation as $index => $item)
-                            <a class="nav-link {{ $index === 0 ? 'is-active' : '' }}" href="{{ $item['href'] }}">{{ $item['label'] }}</a>
+                            <a class="nav-link {{ ($item['active'] ?? $index === 0) ? 'is-active' : '' }}" href="{{ $item['href'] }}">{{ $item['label'] }}</a>
                         @endforeach
                     </nav>
 

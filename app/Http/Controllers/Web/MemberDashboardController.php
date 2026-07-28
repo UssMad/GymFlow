@@ -53,6 +53,7 @@ class MemberDashboardController extends Controller
     {
         $member = $request->user()->member;
         abort_unless($member && $workoutSession->programme->membre_id === $member->id && $workoutSession->programme->statut === 'publie', 404);
+        abort_unless($workoutSession->statut === 'planifie', 422, 'Only planned sessions can be updated.');
 
         $data = $request->validate([
             'retour_membre' => ['nullable', 'string', 'max:500'],
@@ -68,5 +69,26 @@ class MemberDashboardController extends Controller
         ]);
 
         return back()->with('status', "{$workoutSession->jour} is marked complete.");
+    }
+
+    public function missWorkout(Request $request, WorkoutSession $workoutSession): RedirectResponse
+    {
+        $member = $request->user()->member;
+        abort_unless($member && $workoutSession->programme->membre_id === $member->id && $workoutSession->programme->statut === 'publie', 404);
+        abort_unless($workoutSession->statut === 'planifie', 422, 'Only planned sessions can be updated.');
+
+        $data = $request->validate([
+            'raison_non_realisation' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $workoutSession->update([
+            'statut' => 'non_realise',
+            'raison_non_realisation' => $data['raison_non_realisation'] ?? null,
+            'realisee_le' => null,
+            'retour_membre' => null,
+            'difficulte_ressentie' => null,
+        ]);
+
+        return back()->with('status', "{$workoutSession->jour} is marked as missed.");
     }
 }

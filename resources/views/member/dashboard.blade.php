@@ -23,7 +23,7 @@
                     <article class="session-card {{ $session->statut === 'realise' ? 'session-done' : '' }}">
                         <div class="session-heading">
                             <div><p class="eyebrow">Session {{ $session->ordre }}</p><h2>{{ $session->jour }}</h2></div>
-                            <span class="status-pill {{ $session->statut === 'realise' ? 'status-good' : 'status-review' }}">{{ $session->statut === 'realise' ? 'Completed' : 'Planned' }}</span>
+                            <span class="status-pill {{ $session->statut === 'realise' ? 'status-good' : ($session->statut === 'non_realise' ? 'status-muted' : 'status-review') }}">{{ match ($session->statut) { 'realise' => 'Completed', 'non_realise' => 'Missed', default => 'Planned' } }}</span>
                         </div>
                         @if ($session->notes)<p class="session-note">{{ $session->notes }}</p>@endif
                         <div class="exercise-list">
@@ -37,6 +37,8 @@
                         </div>
                         @if ($session->statut === 'realise')
                             <div class="session-complete-note"><strong>Logged {{ $session->realisee_le?->format('d M, H:i') }}</strong><span>{{ ucfirst($session->difficulte_ressentie ?? 'no difficulty shared') }}{{ $session->retour_membre ? ' / '.$session->retour_membre : '' }}</span></div>
+                        @elseif ($session->statut === 'non_realise')
+                            <div class="session-complete-note"><strong>Marked as missed</strong><span>{{ $session->raison_non_realisation ?: 'No reason shared.' }}</span></div>
                         @else
                             <form method="POST" action="{{ route('member.workouts.complete', $session) }}" class="complete-form">
                                 @csrf @method('PUT')
@@ -44,6 +46,7 @@
                                 <label><span>Quick note (optional)</span><input type="text" name="retour_membre" maxlength="500" placeholder="Energy, pain, a personal best..."></label>
                                 <button class="button button-primary" type="submit">Mark complete</button>
                             </form>
+                            <details class="missed-workout"><summary>Could not do this session?</summary><form method="POST" action="{{ route('member.workouts.missed', $session) }}">@csrf @method('PUT')<label><span>Reason (optional)</span><input type="text" name="raison_non_realisation" maxlength="500" placeholder="No time, pain, recovery day..."></label><button class="button button-secondary" type="submit">Mark as missed</button></form></details>
                         @endif
                     </article>
                 @endforeach
