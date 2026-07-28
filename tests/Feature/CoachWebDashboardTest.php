@@ -37,3 +37,31 @@ it('does not allow a member to access the coach dashboard', function () {
 
     $this->actingAs($member)->get('/coach/dashboard')->assertForbidden();
 });
+
+it('shows dedicated members and programmes pages to a coach', function () {
+    $coach = Coach::query()->create([
+        'user_id' => User::factory()->create(['role' => 'coach'])->id,
+        'specialite' => 'Strength training',
+        'disponibilite' => 'Monday to Friday',
+    ]);
+    $member = Member::query()->create([
+        'user_id' => User::factory()->create(['role' => 'member'])->id,
+        'coach_id' => $coach->id,
+    ]);
+    Programme::query()->create([
+        'membre_id' => $member->id,
+        'titre' => 'Member momentum',
+        'source' => 'manuel',
+        'statut' => 'brouillon',
+    ]);
+
+    $this->actingAs($coach->user)->get(route('coach.members.index'))
+        ->assertOk()
+        ->assertSee('Progress board')
+        ->assertSee($member->user->prenom);
+
+    $this->actingAs($coach->user)->get(route('coach.programmes.index'))
+        ->assertOk()
+        ->assertSee('Member momentum')
+        ->assertSee('Programme review');
+});

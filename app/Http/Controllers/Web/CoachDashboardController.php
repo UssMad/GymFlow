@@ -66,6 +66,39 @@ class CoachDashboardController extends Controller
         ]);
     }
 
+    public function members(Request $request, CoachMemberProgressService $progress): View
+    {
+        $coach = $request->user()->coach;
+        abort_unless($coach, 403);
+
+        $members = Member::query()
+            ->where('coach_id', $coach->id)
+            ->with(['user', 'sportProfile'])
+            ->orderBy('id')
+            ->get();
+
+        return view('coach.members', [
+            'members' => $members,
+            'progressByMember' => $members->mapWithKeys(
+                fn (Member $member): array => [$member->id => $progress->summary($member)],
+            ),
+        ]);
+    }
+
+    public function programmes(Request $request): View
+    {
+        $coach = $request->user()->coach;
+        abort_unless($coach, 403);
+
+        $programmes = Programme::query()
+            ->whereHas('member', fn ($query) => $query->where('coach_id', $coach->id))
+            ->with(['member.user', 'sessions.exerciseDetails.exercise'])
+            ->latest('updated_at')
+            ->get();
+
+        return view('coach.programmes', ['programmes' => $programmes]);
+    }
+
     public function updateSportProfile(Request $request, Member $member): RedirectResponse
     {
         $this->ensureCoachManagesMember($request, $member);

@@ -34,12 +34,14 @@ Route::middleware('auth')->group(function (): void {
 
     Route::prefix('coach')->middleware('role:coach')->group(function (): void {
         Route::get('/dashboard', [CoachDashboardController::class, 'index'])->name('coach.dashboard');
+        Route::get('/members', [CoachDashboardController::class, 'members'])->name('coach.members.index');
         Route::get('/members/{member}', [CoachDashboardController::class, 'showMember'])->name('coach.members.show');
         Route::put('/members/{member}/sport-profile', [CoachDashboardController::class, 'updateSportProfile'])->name('coach.members.sport-profile.update');
         Route::post('/members/{member}/ai-generations', [CoachDashboardController::class, 'generateProgramme'])->name('coach.members.ai-generations.store');
         Route::put('/programmes/{programme}', [CoachDashboardController::class, 'updateProgramme'])->name('coach.programmes.update');
         Route::post('/programmes/{programme}/validate', [CoachDashboardController::class, 'validateProgramme'])->name('coach.programmes.validate');
         Route::post('/programmes/{programme}/publish', [CoachDashboardController::class, 'publishProgramme'])->name('coach.programmes.publish');
+        Route::get('/programmes', [CoachDashboardController::class, 'programmes'])->name('coach.programmes.index');
     });
 
     Route::prefix('member')->middleware('role:member')->group(function (): void {

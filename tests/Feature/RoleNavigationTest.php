@@ -29,7 +29,8 @@ it('shows coach navigation links for members and programmes', function () {
         ->assertOk()
         ->assertSee('Members')
         ->assertSee('Programmes')
-        ->assertSee(route('coach.dashboard').'#programmes', false);
+        ->assertSee(route('coach.members.index'), false)
+        ->assertSee(route('coach.programmes.index'), false);
 });
 
 it('shows member navigation links for a programme and history', function () {
