@@ -7,6 +7,33 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+# GymFlow
+
+GymFlow is a gym management and coaching platform. Coaches maintain member sport profiles, request an AI-assisted workout programme, review the draft, then publish it for the member.
+
+## Local development
+
+GymFlow uses Laravel's database queue for AI programme generation. Start the complete local environment with:
+
+```bash
+composer run dev
+```
+
+This starts the Laravel server, the Vite asset server, and the queue worker together. A generation remains `En attente` until the queue worker consumes its job.
+
+When running the application manually, keep the worker open in a second terminal:
+
+```bash
+php artisan serve --port=8010
+php artisan queue:listen --tries=1
+```
+
+You can inspect failures with:
+
+```bash
+php artisan queue:failed
+```
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
