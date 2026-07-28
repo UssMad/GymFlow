@@ -135,6 +135,11 @@ return [
         'openrouter' => [
             'driver' => 'openrouter',
             'key' => env('OPENROUTER_API_KEY'),
+            'models' => [
+                'text' => [
+                    'default' => env('OPENROUTER_TEXT_MODEL', 'openrouter/free'),
+                ],
+            ],
         ],
 
         'voyageai' => [

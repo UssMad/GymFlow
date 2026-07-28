@@ -86,7 +86,7 @@
         </section>
 
         @if ($member->aiGenerations->isNotEmpty())
-            <section class="generation-history"><p class="eyebrow">Generation history</p><div class="generation-list">@foreach ($member->aiGenerations as $generation)<span><strong>{{ ucfirst(str_replace('_', ' ', $generation->statut)) }}</strong><small>{{ $generation->generee_le?->format('d M, H:i') }}</small></span>@endforeach</div></section>
+            <section class="generation-history"><p class="eyebrow">Generation history</p><div class="generation-list">@foreach ($member->aiGenerations as $generation)<span class="generation-status generation-status-{{ $generation->statut }}"><strong>{{ ['en_attente' => 'Queued', 'terminee' => 'Generated', 'echec' => 'Generation failed'][$generation->statut] ?? ucfirst(str_replace('_', ' ', $generation->statut)) }}</strong><small>{{ $generation->generee_le?->format('d M, H:i') }}</small>@if ($generation->statut === 'echec')<small>Provider unavailable or quota reached. Try again later.</small>@endif</span>@endforeach</div></section>
         @endif
 
         <section class="programme-workspace" id="programmes">

@@ -34,6 +34,13 @@ You can inspect failures with:
 php artisan queue:failed
 ```
 
+For the student/demo environment, GymFlow uses OpenRouter's free-model router with a compact three-session weekly draft so the output remains within free-model limits:
+
+```env
+AI_DEFAULT_PROVIDER=openrouter
+OPENROUTER_TEXT_MODEL=openrouter/free
+```
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:

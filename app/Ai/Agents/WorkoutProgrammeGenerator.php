@@ -3,11 +3,13 @@
 namespace App\Ai\Agents;
 
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Promptable;
 use Stringable;
 
+#[MaxTokens(1200)]
 class WorkoutProgrammeGenerator implements Agent, HasStructuredOutput
 {
     use Promptable;
@@ -18,7 +20,7 @@ class WorkoutProgrammeGenerator implements Agent, HasStructuredOutput
             You are GymFlow's fitness-programme assistant. Generate a safe weekly workout draft from the supplied member profile and coach constraints. Respect injuries and constraints. Do not give medical advice. This is for coach review and must never be presented as published.
 
             Return the structured output exactly as requested by the schema:
-            - A title and one or more ordered weekly sessions.
+            - A title and exactly three ordered weekly sessions, with no more than three exercises per session.
             - Every session has a training day, notes, and one or more exercises.
             - Every exercise includes its name, muscle group, type, sets, repetitions, rest, cardio duration, notes, and progression.
             - For strength work, use meaningful sets, repetitions, and rest. For cardio or mobility, use cardio duration when relevant; use 0 only for values that do not apply.
