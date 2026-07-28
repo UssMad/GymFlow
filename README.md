@@ -34,11 +34,11 @@ You can inspect failures with:
 php artisan queue:failed
 ```
 
-For the student/demo environment, GymFlow uses OpenRouter's free-model router with a compact three-session weekly draft so the output remains within free-model limits:
+For the student/demo environment, GymFlow uses OpenRouter's free `gpt-oss-20b` model with a compact three-session weekly draft so the output remains within free-model limits:
 
 ```env
 AI_DEFAULT_PROVIDER=openrouter
-OPENROUTER_TEXT_MODEL=openrouter/free
+OPENROUTER_TEXT_MODEL=openai/gpt-oss-20b:free
 ```
 
 ## About Laravel

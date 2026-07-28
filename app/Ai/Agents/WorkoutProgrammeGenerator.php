@@ -2,15 +2,17 @@
 
 namespace App\Ai\Agents;
 
-use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Attributes\MaxTokens;
+use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Contracts\Agent;
-use Laravel\Ai\Contracts\HasStructuredOutput;
+use Laravel\Ai\Contracts\HasProviderOptions;
+use Laravel\Ai\Enums\Lab;
 use Laravel\Ai\Promptable;
 use Stringable;
 
-#[MaxTokens(1200)]
-class WorkoutProgrammeGenerator implements Agent, HasStructuredOutput
+#[MaxTokens(800)]
+#[Timeout(120)]
+class WorkoutProgrammeGenerator implements Agent, HasProviderOptions
 {
     use Promptable;
 
@@ -19,8 +21,11 @@ class WorkoutProgrammeGenerator implements Agent, HasStructuredOutput
         return <<<'INSTRUCTIONS'
             You are GymFlow's fitness-programme assistant. Generate a safe weekly workout draft from the supplied member profile and coach constraints. Respect injuries and constraints. Do not give medical advice. This is for coach review and must never be presented as published.
 
-            Return the structured output exactly as requested by the schema:
-            - A title and exactly three ordered weekly sessions, with no more than three exercises per session.
+            Return only valid JSON. Do not use Markdown, code fences, or explanatory text. Use these exact JSON keys:
+            - A title and exactly three ordered weekly sessions, with exactly one exercise per session.
+            - Root keys: titre, sessions.
+            - Session keys: jour, notes, exercices.
+            - Exercise keys: nom, groupe_musculaire, type, series, repetitions, repos, duree_cardio, notes, progression.
             - Every session has a training day, notes, and one or more exercises.
             - Every exercise includes its name, muscle group, type, sets, repetitions, rest, cardio duration, notes, and progression.
             - For strength work, use meaningful sets, repetitions, and rest. For cardio or mobility, use cardio duration when relevant; use 0 only for values that do not apply.
@@ -28,25 +33,13 @@ class WorkoutProgrammeGenerator implements Agent, HasStructuredOutput
             INSTRUCTIONS;
     }
 
-    public function schema(JsonSchema $schema): array
+    public function providerOptions(Lab|string $provider): array
     {
-        return [
-            'titre' => $schema->string()->required(),
-            'sessions' => $schema->array()->items($schema->object(fn (JsonSchema $schema): array => [
-                'jour' => $schema->string()->required(),
-                'notes' => $schema->string()->required(),
-                'exercices' => $schema->array()->items($schema->object(fn (JsonSchema $schema): array => [
-                    'nom' => $schema->string()->required(),
-                    'groupe_musculaire' => $schema->string()->required(),
-                    'type' => $schema->string()->enum(['musculation', 'cardio', 'mobilite'])->required(),
-                    'series' => $schema->integer()->min(0)->required(),
-                    'repetitions' => $schema->integer()->min(0)->required(),
-                    'repos' => $schema->string()->required(),
-                    'duree_cardio' => $schema->integer()->min(0)->required(),
-                    'notes' => $schema->string()->required(),
-                    'progression' => $schema->string()->required(),
-                ]))->min(1)->required(),
-            ]))->min(1)->required(),
-        ];
+        if ($provider === Lab::OpenRouter || $provider === 'openrouter') {
+            return ['reasoning' => ['effort' => 'low', 'exclude' => true]];
+        }
+
+        return [];
     }
+
 }
