@@ -63,6 +63,7 @@ class CoachDashboardController extends Controller
         return view('coach.member-workspace', [
             'member' => $member,
             'progress' => $progress->summary($member),
+            'editingProfile' => $request->query('edit') === 'profile' || ! $member->sportProfile,
         ]);
     }
 
@@ -116,7 +117,9 @@ class CoachDashboardController extends Controller
 
         SportProfile::query()->updateOrCreate(['membre_id' => $member->id], $data);
 
-        return back()->with('status', 'Sport profile saved.');
+        return redirect()
+            ->route('coach.members.show', $member)
+            ->with('status', 'Sport profile saved.');
     }
 
     public function generateProgramme(Request $request, Member $member): RedirectResponse

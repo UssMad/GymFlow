@@ -16,19 +16,68 @@
             <article class="stat-card stat-gold"><span>Profile</span><strong>{{ $member->sportProfile ? 'Ready' : 'Needed' }}</strong><small>Required for AI generation</small></article>
         </section>
 
-        <section class="panel management-form" id="profile">
-            <div class="section-heading"><p class="eyebrow">Step 1</p><h2>Sport profile</h2><p>Use the member's real context. This is the information sent to the programme generator.</p></div>
-            <form method="POST" action="{{ route('coach.members.sport-profile.update', $member) }}" class="form-grid">
-                @csrf @method('PUT')
-                <label>Goal<input name="objectif" value="{{ old('objectif', $member->sportProfile?->objectif) }}" required></label>
-                <label>Level<select name="niveau" required><option value="">Choose level</option>@foreach (['debutant' => 'Beginner', 'intermediaire' => 'Intermediate', 'avance' => 'Advanced'] as $value => $label)<option value="{{ $value }}" @selected(old('niveau', $member->sportProfile?->niveau) === $value)>{{ $label }}</option>@endforeach</select></label>
-                <label>Weight (kg)<input name="poids" type="number" min="0" step="0.01" value="{{ old('poids', $member->sportProfile?->poids) }}"></label>
-                <label>Height (cm)<input name="taille" type="number" min="0" step="0.01" value="{{ old('taille', $member->sportProfile?->taille) }}"></label>
-                <label class="form-span-2">Injuries or constraints<textarea name="blessures" rows="3" placeholder="e.g. sensitive knee, no jumping">{{ old('blessures', $member->sportProfile?->blessures) }}</textarea></label>
-                <fieldset class="form-span-2 choice-field"><legend>Available days</legend><div class="choice-list">@foreach (['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as $day)<label><input type="checkbox" name="jours_disponibles[]" value="{{ strtolower($day) }}" @checked(in_array(strtolower($day), old('jours_disponibles', $member->sportProfile?->jours_disponibles ?? [])))><span>{{ $day }}</span></label>@endforeach</div></fieldset>
-                <label class="form-span-2">Preferences<textarea name="preferences" rows="3" required placeholder="Equipment, cardio preference, exercises to avoid...">{{ old('preferences', is_array($member->sportProfile?->preferences) ? implode(', ', $member->sportProfile->preferences) : $member->sportProfile?->preferences) }}</textarea></label>
-                <div class="form-actions form-span-2"><button class="button button-primary" type="submit">Save sport profile</button></div>
-            </form>
+        <section class="panel management-form profile-panel" id="profile">
+            @if ($editingProfile)
+                <div class="section-heading profile-panel-heading">
+                    <div>
+                        <p class="eyebrow">{{ $member->sportProfile ? 'Update profile' : 'Step 1' }}</p>
+                        <h2>{{ $member->sportProfile ? 'Edit sport profile' : 'Create sport profile' }}</h2>
+                        <p>Use the member's real context. This is the information sent to the programme generator.</p>
+                    </div>
+                    @if ($member->sportProfile)
+                        <a class="button button-secondary button-small" href="{{ route('coach.members.show', $member) }}#profile">Cancel</a>
+                    @endif
+                </div>
+                <form method="POST" action="{{ route('coach.members.sport-profile.update', $member) }}" class="form-grid">
+                    @csrf @method('PUT')
+                    <label>Goal<input name="objectif" value="{{ old('objectif', $member->sportProfile?->objectif) }}" required></label>
+                    <label>Level<select name="niveau" required><option value="">Choose level</option>@foreach (['debutant' => 'Beginner', 'intermediaire' => 'Intermediate', 'avance' => 'Advanced'] as $value => $label)<option value="{{ $value }}" @selected(old('niveau', $member->sportProfile?->niveau) === $value)>{{ $label }}</option>@endforeach</select></label>
+                    <label>Weight (kg)<input name="poids" type="number" min="0" step="0.01" value="{{ old('poids', $member->sportProfile?->poids) }}"></label>
+                    <label>Height (cm)<input name="taille" type="number" min="0" step="0.01" value="{{ old('taille', $member->sportProfile?->taille) }}"></label>
+                    <label class="form-span-2">Injuries or constraints<textarea name="blessures" rows="3" placeholder="e.g. sensitive knee, no jumping">{{ old('blessures', $member->sportProfile?->blessures) }}</textarea></label>
+                    <fieldset class="form-span-2 choice-field"><legend>Available days</legend><div class="choice-list">@foreach (['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as $day)<label><input type="checkbox" name="jours_disponibles[]" value="{{ strtolower($day) }}" @checked(in_array(strtolower($day), old('jours_disponibles', $member->sportProfile?->jours_disponibles ?? [])))><span>{{ $day }}</span></label>@endforeach</div></fieldset>
+                    <label class="form-span-2">Preferences<textarea name="preferences" rows="3" required placeholder="Equipment, cardio preference, exercises to avoid...">{{ old('preferences', is_array($member->sportProfile?->preferences) ? implode(', ', $member->sportProfile->preferences) : $member->sportProfile?->preferences) }}</textarea></label>
+                    <div class="form-actions form-span-2"><button class="button button-primary" type="submit">Save sport profile</button></div>
+                </form>
+            @else
+                @php
+                    $profile = $member->sportProfile;
+                    $levelLabels = ['debutant' => 'Beginner', 'intermediaire' => 'Intermediate', 'avance' => 'Advanced'];
+                    $displayNumber = fn ($value) => $value === null ? 'Not provided' : rtrim(rtrim(number_format((float) $value, 2, '.', ''), '0'), '.');
+                @endphp
+                <div class="section-heading profile-panel-heading">
+                    <div>
+                        <p class="eyebrow">Step 1 complete</p>
+                        <h2>Sport profile summary</h2>
+                        <p>This saved context will be used when GymFlow prepares the AI programme draft.</p>
+                    </div>
+                    <a class="button button-secondary button-small" href="{{ route('coach.members.show', ['member' => $member, 'edit' => 'profile']) }}#profile">Edit sport profile</a>
+                </div>
+
+                <div class="profile-overview" aria-label="Sport profile summary">
+                    <div class="profile-goal"><span>Goal</span><strong>{{ $profile->objectif }}</strong></div>
+                    <dl class="profile-metrics">
+                        <div><dt>Level</dt><dd>{{ $levelLabels[$profile->niveau] }}</dd></div>
+                        <div><dt>Weight</dt><dd>{{ $displayNumber($profile->poids) }}{{ $profile->poids !== null ? ' kg' : '' }}</dd></div>
+                        <div><dt>Height</dt><dd>{{ $displayNumber($profile->taille) }}{{ $profile->taille !== null ? ' cm' : '' }}</dd></div>
+                    </dl>
+                </div>
+
+                <dl class="profile-details">
+                    <div>
+                        <dt>Available days</dt>
+                        <dd class="day-tags">@foreach ($profile->jours_disponibles as $day)<span>{{ ucfirst($day) }}</span>@endforeach</dd>
+                    </div>
+                    <div>
+                        <dt>Injuries or constraints</dt>
+                        <dd>{{ $profile->blessures ?: 'None recorded' }}</dd>
+                    </div>
+                    <div class="profile-detail-wide">
+                        <dt>Preferences</dt>
+                        <dd>{{ is_array($profile->preferences) ? implode(', ', $profile->preferences) : $profile->preferences }}</dd>
+                    </div>
+                </dl>
+            @endif
         </section>
 
         <section class="panel generation-panel" id="generation">

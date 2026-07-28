@@ -26,7 +26,7 @@ it('lets a coach manage an assigned member sport profile', function () {
     $this->actingAs($coach->user)
         ->get(route('coach.members.show', $member))
         ->assertOk()
-        ->assertSee('Sport profile');
+        ->assertSee('Create sport profile');
 
     $this->actingAs($coach->user)
         ->put(route('coach.members.sport-profile.update', $member), [
@@ -37,6 +37,7 @@ it('lets a coach manage an assigned member sport profile', function () {
             'jours_disponibles' => ['monday', 'wednesday'],
             'preferences' => 'Free weights',
         ])
+        ->assertRedirect(route('coach.members.show', $member))
         ->assertSessionHas('status', 'Sport profile saved.');
 
     $this->assertDatabaseHas('sport_profiles', [
@@ -44,6 +45,17 @@ it('lets a coach manage an assigned member sport profile', function () {
         'objectif' => 'Build strength',
     ]);
 
+    $this->actingAs($coach->user)
+        ->get(route('coach.members.show', $member))
+        ->assertOk()
+        ->assertSee('Sport profile summary')
+        ->assertSee('Edit sport profile')
+        ->assertSee('Build strength');
+
+    $this->actingAs($coach->user)
+        ->get(route('coach.members.show', ['member' => $member, 'edit' => 'profile']))
+        ->assertOk()
+        ->assertSee('Save sport profile');
 });
 
 it('does not let a coach manage another coach member', function () {
