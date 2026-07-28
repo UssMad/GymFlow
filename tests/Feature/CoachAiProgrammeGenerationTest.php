@@ -99,7 +99,7 @@ it('stores structured AI output as an unpublished programme draft', function () 
         ],
         'generee_le' => now(),
     ]);
-    WorkoutProgrammeGenerator::fake([[
+    WorkoutProgrammeGenerator::fake(['Here is the requested draft:\n```json\n'.json_encode([
         'titre' => 'Programme prise de masse',
         'sessions' => [[
             'jour' => 'Lundi',
@@ -107,16 +107,16 @@ it('stores structured AI output as an unpublished programme draft', function () 
             'exercices' => [[
                 'nom' => 'Developpe couche',
                 'groupe_musculaire' => 'Pectoraux',
-                'type' => 'musculation',
+                'type' => 'force',
                 'series' => 4,
                 'repetitions' => 10,
-                'repos' => '90 secondes',
+                'repos' => 90,
                 'duree_cardio' => 0,
                 'notes' => 'Controle du mouvement.',
                 'progression' => 'Ajouter une repetition si possible.',
             ]],
         ]],
-    ]])->preventStrayPrompts();
+    ], JSON_THROW_ON_ERROR).'\n```'])->preventStrayPrompts();
 
     (new GenerateWorkoutProgrammeDraft($generation->id))->handle(
         app(WorkoutProgrammeGenerator::class),

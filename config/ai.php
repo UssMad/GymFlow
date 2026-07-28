@@ -137,7 +137,7 @@ return [
             'key' => env('OPENROUTER_API_KEY'),
             'models' => [
                 'text' => [
-                    'default' => env('OPENROUTER_TEXT_MODEL', 'openrouter/free'),
+                    'default' => env('OPENROUTER_TEXT_MODEL', 'openai/gpt-oss-20b:free'),
                 ],
             ],
         ],

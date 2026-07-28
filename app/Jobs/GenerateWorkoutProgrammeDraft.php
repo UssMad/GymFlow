@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
+use JsonException;
 use Throwable;
 
 class GenerateWorkoutProgrammeDraft implements ShouldQueue
@@ -27,13 +28,19 @@ class GenerateWorkoutProgrammeDraft implements ShouldQueue
     public function handle(WorkoutProgrammeGenerator $agent, WorkoutProgrammeDraftValidator $validator): void
     {
         $generation = AiGeneration::query()->find($this->generationId);
+        $rawResponse = null;
 
         if (! $generation || $generation->statut !== 'en_attente') {
             return;
         }
 
         try {
-            $draft = $agent->prompt(WorkoutProgrammePrompt::for(WorkoutProgrammePrompt::context($generation->contexte_utilise)))->toArray();
+            $response = $agent->prompt(WorkoutProgrammePrompt::for(WorkoutProgrammePrompt::context($generation->contexte_utilise)));
+            $rawResponse = $response->text;
+            $draft = method_exists($response, 'toArray')
+                ? $response->toArray()
+                : $this->parseDraft($response->text);
+            $draft = $this->normaliseDraft($draft);
             $validator->validate($draft);
 
             DB::transaction(function () use ($generation, $draft): void {
@@ -91,6 +98,7 @@ class GenerateWorkoutProgrammeDraft implements ShouldQueue
                 'reponse_brute' => [
                     'error_code' => 'invalid_response',
                     'error' => $exception->getMessage(),
+                    'raw_response' => $rawResponse,
                 ],
             ]);
         } catch (Throwable $exception) {
@@ -107,5 +115,55 @@ class GenerateWorkoutProgrammeDraft implements ShouldQueue
                 ],
             ]);
         }
+    }
+
+    /** @return array<string, mixed> */
+    private function parseDraft(string $response): array
+    {
+        $json = preg_replace('/^```(?:json)?\\s*|\\s*```$/i', '', trim($response));
+        $start = strpos($json, '{');
+        $end = strrpos($json, '}');
+
+        if ($start !== false && $end !== false && $end > $start) {
+            $json = substr($json, $start, $end - $start + 1);
+        }
+
+        $json = preg_replace('/("repetitions"\\s*:\\s*\\d+)\\s+per\\s+side/i', '$1', $json);
+        $json = preg_replace('/^\\s*(?!")[A-Za-z][^:\\r\\n]*:\\s*[^,\\r\\n]+,\\s*$/m', '', $json);
+
+        try {
+            $draft = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException) {
+            throw new InvalidArgumentException('Generated programme is not valid JSON.');
+        }
+
+        if (! is_array($draft)) {
+            throw new InvalidArgumentException('Generated programme must be a JSON object.');
+        }
+
+        return $draft;
+    }
+
+    /** @param array<string, mixed> $draft
+     *  @return array<string, mixed>
+     */
+    private function normaliseDraft(array $draft): array
+    {
+        foreach ($draft['sessions'] ?? [] as $sessionIndex => $session) {
+            foreach ($session['exercices'] ?? [] as $exerciseIndex => $exercise) {
+                $type = Str::lower((string) ($exercise['type'] ?? ''));
+                $draft['sessions'][$sessionIndex]['exercices'][$exerciseIndex]['type'] = match ($type) {
+                    'force', 'strength' => 'musculation',
+                    'mobility', 'mobilite' => 'mobilite',
+                    default => $type,
+                };
+
+                if (is_int($exercise['repos'] ?? null) || is_float($exercise['repos'] ?? null)) {
+                    $draft['sessions'][$sessionIndex]['exercices'][$exerciseIndex]['repos'] = $exercise['repos'].' seconds';
+                }
+            }
+        }
+
+        return $draft;
     }
 }
