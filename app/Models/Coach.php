@@ -28,4 +28,9 @@ class Coach extends Model
     {
         return $this->hasMany(Programme::class, 'coach_validateur_id');
     }
+
+    public function aiConversations(): HasMany
+    {
+        return $this->hasMany(CoachAiConversation::class);
+    }
 }
