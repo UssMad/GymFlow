@@ -24,7 +24,7 @@ class GenerateWorkoutProgrammeDraft implements ShouldQueue
     use Queueable;
 
     /** Give free AI models enough time to produce a complete, multi-exercise draft. */
-    public int $timeout = 210;
+    public int $timeout = 270;
 
     public function __construct(public int $generationId) {}
 

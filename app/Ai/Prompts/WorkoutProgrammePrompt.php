@@ -62,10 +62,10 @@ class WorkoutProgrammePrompt
         ], true);
 
         if ($hasConstraints || in_array($level, ['debutant', 'beginner'], true)) {
-            return 2;
+            return 3;
         }
 
-        return in_array($level, ['avance', 'advanced'], true) ? 4 : 3;
+        return in_array($level, ['avance', 'advanced'], true) ? 5 : 4;
     }
 
     /**

@@ -28,14 +28,14 @@ it('builds a safe weekly coach-review prompt from all profile and coach constrai
         ->toContain('Poids libres')
         ->toContain('Programme precedent')
         ->toContain('Musculation')
-        ->toContain('exactly 2 exercises in every session')
+        ->toContain('exactly 3 exercises in every session')
         ->toContain('Do not diagnose, treat, or provide medical advice')
         ->toContain('DRAFT for coach review');
 });
 
 it('adapts the exercise count to level and constraints', function () {
-    expect(WorkoutProgrammePrompt::exerciseCountFor(['niveau' => 'debutant', 'blessures' => 'Aucune']))->toBe(2)
-        ->and(WorkoutProgrammePrompt::exerciseCountFor(['niveau' => 'intermediaire', 'blessures' => 'Aucune']))->toBe(3)
-        ->and(WorkoutProgrammePrompt::exerciseCountFor(['niveau' => 'avance', 'blessures' => 'Aucune']))->toBe(4)
-        ->and(WorkoutProgrammePrompt::exerciseCountFor(['niveau' => 'avance', 'blessures' => 'Douleur a l epaule']))->toBe(2);
+    expect(WorkoutProgrammePrompt::exerciseCountFor(['niveau' => 'debutant', 'blessures' => 'Aucune']))->toBe(3)
+        ->and(WorkoutProgrammePrompt::exerciseCountFor(['niveau' => 'intermediaire', 'blessures' => 'Aucune']))->toBe(4)
+        ->and(WorkoutProgrammePrompt::exerciseCountFor(['niveau' => 'avance', 'blessures' => 'Aucune']))->toBe(5)
+        ->and(WorkoutProgrammePrompt::exerciseCountFor(['niveau' => 'avance', 'blessures' => 'Douleur a l epaule']))->toBe(3);
 });
