@@ -71,6 +71,7 @@ class GenerateWorkoutProgrammeDraft implements ShouldQueue
                             'nom' => $exerciseData['nom'],
                             'groupe_musculaire' => $exerciseData['groupe_musculaire'],
                             'type' => $exerciseData['type'],
+                            'image_url' => Exercise::imageForType($exerciseData['type']),
                             'niveau' => $generation->contexte_utilise['niveau'],
                         ]);
 
