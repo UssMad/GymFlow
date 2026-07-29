@@ -95,6 +95,19 @@ it('lets the assigned coach edit an exercise prescription in a draft only', func
         ]);
 
     $this->actingAs($coach->user)
+        ->get(route('coach.members.show', $member))
+        ->assertOk()
+        ->assertSee('programme-exercise', false)
+        ->assertSee('Edit prescription')
+        ->assertSee('photo-1581009146145-b5ef050c2e1e', false);
+
+    $this->actingAs($coach->user)
+        ->get(route('coach.programmes.index'))
+        ->assertOk()
+        ->assertSee('programme-session', false)
+        ->assertSee('Goblet squat');
+
+    $this->actingAs($coach->user)
         ->put(route('coach.exercise-details.update', $detail), [
             'series' => 4,
             'repetitions' => 12,

@@ -92,8 +92,8 @@
         <section class="programme-workspace" id="programmes">
             <div class="section-heading"><p class="eyebrow">Step 3</p><h2>Review and publish</h2><p>A draft can be renamed and scheduled before validation. Published programmes become visible to the member.</p></div>
             @forelse ($member->programmes as $programme)
-                <article class="panel programme-review-card">
-                    <div class="panel-heading"><div><span class="status-pill {{ $programme->statut === 'publie' ? 'status-good' : 'status-review' }}">{{ ucfirst($programme->statut) }}</span><h2>{{ $programme->titre }}</h2><p class="muted-copy">{{ ucfirst($programme->source) }} programme / {{ $programme->sessions->count() }} sessions</p></div></div>
+                <article class="programme-review-card">
+                    <div class="programme-review-heading"><div><span class="status-pill {{ $programme->statut === 'publie' ? 'status-good' : 'status-review' }}">{{ ucfirst($programme->statut) }}</span><h2>{{ $programme->titre }}</h2><p class="muted-copy">{{ ucfirst($programme->source) }} programme / {{ $programme->sessions->count() }} sessions</p></div></div>
                     @if ($programme->statut === 'brouillon')
                         <form method="POST" action="{{ route('coach.programmes.update', $programme) }}" class="form-grid programme-meta-form">@csrf @method('PUT')
                             <label class="form-span-2">Programme name<input name="titre" value="{{ old('titre', $programme->titre) }}" required></label>
@@ -102,33 +102,26 @@
                             <div class="form-actions form-span-2"><button class="button button-secondary" type="submit">Save programme details</button></div>
                         </form>
                     @endif
-                    <div class="programme-session-preview">
+                    <div class="programme-sessions">
                         @foreach ($programme->sessions->sortBy('ordre') as $session)
-                            <div>
-                                <strong>{{ $session->jour }}</strong>
-                                <div class="exercise-thumbnail-list">
+                            <section class="programme-session">
+                                <header class="programme-session-header">
+                                    <span class="programme-session-index">{{ str_pad((string) $session->ordre, 2, '0', STR_PAD_LEFT) }}</span>
+                                    <div>
+                                        <p>Training day</p>
+                                        <h3>{{ ucfirst($session->jour) }}</h3>
+                                        @if ($session->notes)<span>{{ $session->notes }}</span>@endif
+                                    </div>
+                                </header>
+                                <div class="programme-exercise-grid">
                                     @foreach ($session->exerciseDetails->sortBy('ordre') as $detail)
-                                        <div class="exercise-thumbnail-item">
-                                            <img src="{{ $detail->exercise->resolvedImageUrl() }}" alt="{{ $detail->exercise->nom }}" loading="lazy">
-                                            <span>{{ $detail->exercise->nom }}</span>
-                                            @if ($programme->statut === 'brouillon')
-                                                <details class="exercise-edit-details">
-                                                    <summary>Edit prescription</summary>
-                                                    <form method="POST" action="{{ route('coach.exercise-details.update', $detail) }}" class="exercise-edit-form">
-                                                        @csrf @method('PUT')
-                                                        <label>Sets<input name="series" type="number" min="0" value="{{ old('series', $detail->series) }}"></label>
-                                                        <label>Reps<input name="repetitions" type="number" min="0" value="{{ old('repetitions', $detail->repetitions) }}"></label>
-                                                        <label>Rest<input name="repos" value="{{ old('repos', $detail->repos) }}" placeholder="e.g. 60 seconds"></label>
-                                                        <label>Cardio (min)<input name="duree_cardio" type="number" min="0" value="{{ old('duree_cardio', $detail->duree_cardio) }}"></label>
-                                                        <label class="exercise-edit-notes">Notes<textarea name="notes" rows="2">{{ old('notes', $detail->notes) }}</textarea></label>
-                                                        <button class="button button-secondary button-small" type="submit">Save exercise</button>
-                                                    </form>
-                                                </details>
-                                            @endif
-                                        </div>
+                                        @include('coach.partials.exercise-card', [
+                                            'detail' => $detail,
+                                            'editable' => $programme->statut === 'brouillon',
+                                        ])
                                     @endforeach
                                 </div>
-                            </div>
+                            </section>
                         @endforeach
                     </div>
                     <div class="review-actions">
