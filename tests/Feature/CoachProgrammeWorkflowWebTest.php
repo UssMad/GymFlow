@@ -45,6 +45,13 @@ it('queues an AI programme for a coached member with a sport profile', function 
         'membre_id' => $member->id,
         'statut' => 'en_attente',
     ]);
+
+    $this->actingAs($coach->user)
+        ->get(route('coach.members.show', $member))
+        ->assertOk()
+        ->assertSee('generation-timeline', false)
+        ->assertSee('Waiting for the AI worker')
+        ->assertSee('Latest');
 });
 
 it('lets a coach validate and publish their member draft', function () {
@@ -98,6 +105,10 @@ it('lets the assigned coach edit an exercise prescription in a draft only', func
         ->get(route('coach.members.show', $member))
         ->assertOk()
         ->assertSee('programme-exercise', false)
+        ->assertSee('programme-settings-form', false)
+        ->assertSee('Draft programme settings', false)
+        ->assertSee('Editable draft')
+        ->assertSee('1 session')
         ->assertSee('Edit prescription')
         ->assertSee('photo-1581009146145-b5ef050c2e1e', false);
 

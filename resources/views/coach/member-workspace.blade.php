@@ -139,10 +139,14 @@
                 <article class="programme-review-card">
                     <div class="programme-review-heading">
                         <div><span class="status-pill {{ $programme->statut === 'publie' ? 'status-good' : 'status-review' }}">{{ ucfirst($programme->statut) }}</span><h2>{{ $programme->titre }}</h2></div>
-                        <div class="programme-review-facts"><span>{{ $programme->sessions->count() }} {{ Str::plural('session', $programme->sessions->count()) }}</span><span>{{ ucfirst($programme->source) }} source</span></div>
+                        <div class="programme-review-facts">
+                            <span>{{ $programme->sessions->count() }} {{ Str::plural('session', $programme->sessions->count()) }}</span>
+                            <span>{{ ucfirst($programme->source) }} source</span>
+                            @if ($programme->statut === 'brouillon')<span>Editable draft</span>@endif
+                        </div>
                     </div>
                     @if ($programme->statut === 'brouillon')
-                        <form method="POST" action="{{ route('coach.programmes.update', $programme) }}" class="programme-settings-form">@csrf @method('PUT')
+                        <form method="POST" action="{{ route('coach.programmes.update', $programme) }}" class="programme-settings-form" aria-label="Draft programme settings">@csrf @method('PUT')
                             <label class="programme-title-field">Programme name<input name="titre" value="{{ old('titre', $programme->titre) }}" required></label>
                             <label>Starts<input name="date_debut" type="date" value="{{ old('date_debut', $programme->date_debut?->format('Y-m-d')) }}"></label>
                             <label>Ends<input name="date_fin" type="date" value="{{ old('date_fin', $programme->date_fin?->format('Y-m-d')) }}"></label>
