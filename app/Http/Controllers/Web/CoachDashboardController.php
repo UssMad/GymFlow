@@ -195,6 +195,14 @@ class CoachDashboardController extends Controller
         return back()->with('status', 'Exercise prescription updated.');
     }
 
+    public function destroyProgramme(Request $request, Programme $programme): RedirectResponse
+    {
+        $this->ensureCoachOwnsProgramme($request, $programme);
+        $programme->delete();
+
+        return back()->with('status', 'Programme deleted.');
+    }
+
     public function validateProgramme(Request $request, Programme $programme): RedirectResponse
     {
         $coach = $this->ensureCoachOwnsProgramme($request, $programme);

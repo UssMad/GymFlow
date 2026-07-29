@@ -134,6 +134,7 @@
                     <div class="review-actions">
                         @if ($programme->statut === 'brouillon')<form method="POST" action="{{ route('coach.programmes.validate', $programme) }}">@csrf<button class="button button-primary" type="submit">Validate programme</button></form>@endif
                         @if ($programme->statut === 'valide')<form method="POST" action="{{ route('coach.programmes.publish', $programme) }}">@csrf<button class="button button-primary" type="submit">Publish for member</button></form>@endif
+                        <form method="POST" action="{{ route('coach.programmes.destroy', $programme) }}">@csrf @method('DELETE')<button class="button button-secondary" type="submit">Delete programme</button></form>
                     </div>
                 </article>
             @empty

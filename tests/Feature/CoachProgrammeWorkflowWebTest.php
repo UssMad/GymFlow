@@ -117,3 +117,34 @@ it('lets the assigned coach edit an exercise prescription in a draft only', func
         ->put(route('coach.exercise-details.update', $detail), ['series' => 5])
         ->assertStatus(422);
 });
+
+it('lets the assigned coach delete a programme and its workout data', function () {
+    $coach = makeCoachForProgrammeWorkflow();
+    $member = Member::query()->create([
+        'user_id' => User::factory()->create(['role' => 'member'])->id,
+        'coach_id' => $coach->id,
+    ]);
+    $programme = Programme::query()->create([
+        'membre_id' => $member->id,
+        'titre' => 'Programme to delete',
+        'source' => 'ia',
+        'statut' => 'brouillon',
+    ]);
+    $session = $programme->sessions()->create(['jour' => 'Monday', 'ordre' => 1]);
+    $session->exerciseDetails()->create([
+        'exercice_id' => Exercise::query()->create([
+            'nom' => 'Bridge',
+            'groupe_musculaire' => 'Glutes',
+            'type' => 'musculation',
+        ])->id,
+        'ordre' => 1,
+    ]);
+
+    $this->actingAs($coach->user)
+        ->delete(route('coach.programmes.destroy', $programme))
+        ->assertSessionHas('status', 'Programme deleted.');
+
+    $this->assertDatabaseMissing('programmes', ['id' => $programme->id]);
+    $this->assertDatabaseCount('workout_sessions', 0);
+    $this->assertDatabaseCount('exercise_details', 0);
+});
