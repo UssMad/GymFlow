@@ -10,10 +10,11 @@ it('defines a structured weekly draft contract and keeps approval under coach co
 
     expect($instructions)
         ->toContain('Return only valid JSON')
-        ->toContain('title and exactly three ordered weekly sessions, with exactly one exercise per session')
+        ->toContain('title and exactly three ordered weekly sessions')
+        ->toContain('exact number of exercises required in every session')
         ->toContain('name, muscle group, type, sets, repetitions, rest, cardio duration, notes, and progression')
         ->toContain('Do not return a programme status, validation decision, or publication decision');
 
-    expect(TextGenerationOptions::forAgent($generator)->maxTokens)->toBe(800);
+    expect(TextGenerationOptions::forAgent($generator)->maxTokens)->toBe(2200);
     expect($generator->providerOptions(Lab::OpenRouter))->toBe(['reasoning' => ['effort' => 'low', 'exclude' => true]]);
 });

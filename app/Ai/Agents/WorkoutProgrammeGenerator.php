@@ -10,8 +10,8 @@ use Laravel\Ai\Enums\Lab;
 use Laravel\Ai\Promptable;
 use Stringable;
 
-#[MaxTokens(800)]
-#[Timeout(120)]
+#[MaxTokens(2200)]
+#[Timeout(180)]
 class WorkoutProgrammeGenerator implements Agent, HasProviderOptions
 {
     use Promptable;
@@ -22,7 +22,7 @@ class WorkoutProgrammeGenerator implements Agent, HasProviderOptions
             You are GymFlow's fitness-programme assistant. Generate a safe weekly workout draft from the supplied member profile and coach constraints. Respect injuries and constraints. Do not give medical advice. This is for coach review and must never be presented as published.
 
             Return only valid JSON. Do not use Markdown, code fences, or explanatory text. Use these exact JSON keys:
-            - A title and exactly three ordered weekly sessions, with exactly one exercise per session.
+            - A title and exactly three ordered weekly sessions. The member prompt states the exact number of exercises required in every session.
             - Root keys: titre, sessions.
             - Session keys: jour, notes, exercices.
             - Exercise keys: nom, groupe_musculaire, type, series, repetitions, repos, duree_cardio, notes, progression.

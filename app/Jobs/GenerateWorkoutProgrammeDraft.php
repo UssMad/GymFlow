@@ -23,6 +23,9 @@ class GenerateWorkoutProgrammeDraft implements ShouldQueue
 {
     use Queueable;
 
+    /** Give free AI models enough time to produce a complete, multi-exercise draft. */
+    public int $timeout = 210;
+
     public function __construct(public int $generationId) {}
 
     public function handle(WorkoutProgrammeGenerator $agent, WorkoutProgrammeDraftValidator $validator): void
@@ -155,7 +158,7 @@ class GenerateWorkoutProgrammeDraft implements ShouldQueue
                 $type = Str::lower((string) ($exercise['type'] ?? ''));
                 $draft['sessions'][$sessionIndex]['exercices'][$exerciseIndex]['type'] = match ($type) {
                     'force', 'strength' => 'musculation',
-                    'mobility', 'mobilite' => 'mobilite',
+                    'mobility', 'mobilite', 'moi' => 'mobilite',
                     default => $type,
                 };
 
