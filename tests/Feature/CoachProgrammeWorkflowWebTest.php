@@ -2,6 +2,7 @@
 
 use App\Jobs\GenerateWorkoutProgrammeDraft;
 use App\Models\Coach;
+use App\Models\Exercise;
 use App\Models\Member;
 use App\Models\Programme;
 use App\Models\SportProfile;
@@ -66,4 +67,53 @@ it('lets a coach validate and publish their member draft', function () {
     $this->actingAs($coach->user)->post(route('coach.programmes.publish', $programme))
         ->assertSessionHas('status', 'Programme published for the member.');
     $this->assertDatabaseHas('programmes', ['id' => $programme->id, 'statut' => 'publie']);
+});
+
+it('lets the assigned coach edit an exercise prescription in a draft only', function () {
+    $coach = makeCoachForProgrammeWorkflow();
+    $member = Member::query()->create([
+        'user_id' => User::factory()->create(['role' => 'member'])->id,
+        'coach_id' => $coach->id,
+    ]);
+    $programme = Programme::query()->create([
+        'membre_id' => $member->id,
+        'titre' => 'Editable draft',
+        'source' => 'ia',
+        'statut' => 'brouillon',
+    ]);
+    $detail = $programme->sessions()->create(['jour' => 'Monday', 'ordre' => 1])
+        ->exerciseDetails()
+        ->create([
+            'exercice_id' => Exercise::query()->create([
+                'nom' => 'Goblet squat',
+                'groupe_musculaire' => 'Legs',
+                'type' => 'musculation',
+            ])->id,
+            'ordre' => 1,
+            'series' => 3,
+            'repetitions' => 10,
+        ]);
+
+    $this->actingAs($coach->user)
+        ->put(route('coach.exercise-details.update', $detail), [
+            'series' => 4,
+            'repetitions' => 12,
+            'repos' => '90 seconds',
+            'duree_cardio' => 0,
+            'notes' => 'Use a controlled tempo.',
+        ])
+        ->assertSessionHas('status', 'Exercise prescription updated.');
+
+    $this->assertDatabaseHas('exercise_details', [
+        'id' => $detail->id,
+        'series' => 4,
+        'repetitions' => 12,
+        'repos' => '90 seconds',
+    ]);
+
+    $programme->update(['statut' => 'valide']);
+
+    $this->actingAs($coach->user)
+        ->put(route('coach.exercise-details.update', $detail), ['series' => 5])
+        ->assertStatus(422);
 });

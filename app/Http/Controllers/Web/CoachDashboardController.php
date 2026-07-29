@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Jobs\GenerateWorkoutProgrammeDraft;
 use App\Models\AiGeneration;
+use App\Models\ExerciseDetail;
 use App\Models\Member;
 use App\Models\Programme;
 use App\Models\SportProfile;
@@ -171,6 +172,27 @@ class CoachDashboardController extends Controller
         $programme->update($data);
 
         return back()->with('status', 'Programme details updated.');
+    }
+
+    public function updateExerciseDetail(Request $request, ExerciseDetail $exerciseDetail): RedirectResponse
+    {
+        $exerciseDetail->loadMissing('workoutSession.programme.member');
+        $programme = $exerciseDetail->workoutSession->programme;
+
+        $this->ensureCoachOwnsProgramme($request, $programme);
+        abort_unless($programme->statut === 'brouillon', 422, 'Only draft programme exercises can be edited.');
+
+        $data = $request->validate([
+            'series' => ['nullable', 'integer', 'min:0', 'max:99'],
+            'repetitions' => ['nullable', 'integer', 'min:0', 'max:999'],
+            'repos' => ['nullable', 'string', 'max:100'],
+            'duree_cardio' => ['nullable', 'integer', 'min:0', 'max:999'],
+            'notes' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $exerciseDetail->update($data);
+
+        return back()->with('status', 'Exercise prescription updated.');
     }
 
     public function validateProgramme(Request $request, Programme $programme): RedirectResponse

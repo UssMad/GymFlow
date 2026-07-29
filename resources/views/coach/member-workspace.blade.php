@@ -102,7 +102,35 @@
                             <div class="form-actions form-span-2"><button class="button button-secondary" type="submit">Save programme details</button></div>
                         </form>
                     @endif
-                    <div class="programme-session-preview">@foreach ($programme->sessions->sortBy('ordre') as $session)<div><strong>{{ $session->jour }}</strong><span class="exercise-thumbnail-list">@foreach ($session->exerciseDetails->sortBy('ordre') as $detail)<span class="exercise-thumbnail-item"><img src="{{ $detail->exercise->resolvedImageUrl() }}" alt="{{ $detail->exercise->nom }}" loading="lazy"><span>{{ $detail->exercise->nom }}</span></span>@endforeach</span></div>@endforeach</div>
+                    <div class="programme-session-preview">
+                        @foreach ($programme->sessions->sortBy('ordre') as $session)
+                            <div>
+                                <strong>{{ $session->jour }}</strong>
+                                <div class="exercise-thumbnail-list">
+                                    @foreach ($session->exerciseDetails->sortBy('ordre') as $detail)
+                                        <div class="exercise-thumbnail-item">
+                                            <img src="{{ $detail->exercise->resolvedImageUrl() }}" alt="{{ $detail->exercise->nom }}" loading="lazy">
+                                            <span>{{ $detail->exercise->nom }}</span>
+                                            @if ($programme->statut === 'brouillon')
+                                                <details class="exercise-edit-details">
+                                                    <summary>Edit prescription</summary>
+                                                    <form method="POST" action="{{ route('coach.exercise-details.update', $detail) }}" class="exercise-edit-form">
+                                                        @csrf @method('PUT')
+                                                        <label>Sets<input name="series" type="number" min="0" value="{{ old('series', $detail->series) }}"></label>
+                                                        <label>Reps<input name="repetitions" type="number" min="0" value="{{ old('repetitions', $detail->repetitions) }}"></label>
+                                                        <label>Rest<input name="repos" value="{{ old('repos', $detail->repos) }}" placeholder="e.g. 60 seconds"></label>
+                                                        <label>Cardio (min)<input name="duree_cardio" type="number" min="0" value="{{ old('duree_cardio', $detail->duree_cardio) }}"></label>
+                                                        <label class="exercise-edit-notes">Notes<textarea name="notes" rows="2">{{ old('notes', $detail->notes) }}</textarea></label>
+                                                        <button class="button button-secondary button-small" type="submit">Save exercise</button>
+                                                    </form>
+                                                </details>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
                     <div class="review-actions">
                         @if ($programme->statut === 'brouillon')<form method="POST" action="{{ route('coach.programmes.validate', $programme) }}">@csrf<button class="button button-primary" type="submit">Validate programme</button></form>@endif
                         @if ($programme->statut === 'valide')<form method="POST" action="{{ route('coach.programmes.publish', $programme) }}">@csrf<button class="button button-primary" type="submit">Publish for member</button></form>@endif

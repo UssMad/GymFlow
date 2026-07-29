@@ -39,6 +39,7 @@ Route::middleware('auth')->group(function (): void {
         Route::put('/members/{member}/sport-profile', [CoachDashboardController::class, 'updateSportProfile'])->name('coach.members.sport-profile.update');
         Route::post('/members/{member}/ai-generations', [CoachDashboardController::class, 'generateProgramme'])->name('coach.members.ai-generations.store');
         Route::put('/programmes/{programme}', [CoachDashboardController::class, 'updateProgramme'])->name('coach.programmes.update');
+        Route::put('/exercise-details/{exerciseDetail}', [CoachDashboardController::class, 'updateExerciseDetail'])->name('coach.exercise-details.update');
         Route::post('/programmes/{programme}/validate', [CoachDashboardController::class, 'validateProgramme'])->name('coach.programmes.validate');
         Route::post('/programmes/{programme}/publish', [CoachDashboardController::class, 'publishProgramme'])->name('coach.programmes.publish');
         Route::get('/programmes', [CoachDashboardController::class, 'programmes'])->name('coach.programmes.index');
