@@ -104,17 +104,17 @@ it('stores structured AI output as an unpublished programme draft', function () 
         'sessions' => [[
             'jour' => 'Lundi',
             'notes' => 'Haut du corps',
-            'exercices' => [[
+            'exercices' => array_fill(0, 3, [
                 'nom' => 'Developpe couche',
                 'groupe_musculaire' => 'Pectoraux',
-                'type' => 'force',
+                'type' => 'moi',
                 'series' => 4,
                 'repetitions' => 10,
                 'repos' => 90,
                 'duree_cardio' => 0,
                 'notes' => 'Controle du mouvement.',
                 'progression' => 'Ajouter une repetition si possible.',
-            ]],
+            ]),
         ]],
     ], JSON_THROW_ON_ERROR).'\n```'])->preventStrayPrompts();
 
@@ -131,7 +131,7 @@ it('stores structured AI output as an unpublished programme draft', function () 
         'source' => 'ia',
     ]);
     $this->assertDatabaseCount('workout_sessions', 1);
-    $this->assertDatabaseCount('exercise_details', 1);
+    $this->assertDatabaseCount('exercise_details', 3);
     expect($generation->fresh()->reponse_brute)
         ->toHaveKey('titre')
         ->toHaveKey('sessions.0.exercices.0.progression');

@@ -2,6 +2,7 @@
 
 namespace App\Ai\Prompts;
 
+use Illuminate\Support\Str;
 use JsonException;
 
 class WorkoutProgrammePrompt
@@ -11,6 +12,8 @@ class WorkoutProgrammePrompt
      */
     public static function for(array $context): string
     {
+        $exerciseCount = self::exerciseCountFor($context);
+
         return <<<PROMPT
             Create a safe, realistic weekly workout programme draft for GymFlow.
 
@@ -37,9 +40,32 @@ class WorkoutProgrammePrompt
 
             Programme rules:
             1. Build a weekly programme organised into sessions matching the available days where possible.
-            2. Include exercises, sets, repetitions, rest, cardio duration where relevant, session notes, and a practical progression note.
-            3. Return only the structured output requested by the schema. This result is a DRAFT for coach review, editing, validation, and publication. It must never be presented as an approved or published programme.
+            2. Use exactly {$exerciseCount} exercises in every session. This volume includes cardio or mobility exercises. Do not return fewer or more exercises in a session.
+            3. Include exercises, sets, repetitions, rest, cardio duration where relevant, session notes, and a practical progression note. Keep exercise notes and progression notes concise.
+            4. Return only the structured output requested by the schema. This result is a DRAFT for coach review, editing, validation, and publication. It must never be presented as an approved or published programme.
             PROMPT;
+    }
+
+    /**
+     * Pick a safe, realistic session volume from the information the coach supplied.
+     */
+    public static function exerciseCountFor(array $context): int
+    {
+        $level = self::normalise((string) ($context['niveau'] ?? ''));
+        $injuries = self::normalise((string) ($context['blessures'] ?? ''));
+        $hasConstraints = $injuries !== '' && ! in_array($injuries, [
+            'aucune',
+            'aucun',
+            'none',
+            'no injury',
+            'not provided',
+        ], true);
+
+        if ($hasConstraints || in_array($level, ['debutant', 'beginner'], true)) {
+            return 2;
+        }
+
+        return in_array($level, ['avance', 'advanced'], true) ? 4 : 3;
     }
 
     /**
@@ -71,5 +97,10 @@ class WorkoutProgrammePrompt
         }
 
         return filled($value) ? (string) $value : 'Not provided';
+    }
+
+    private static function normalise(string $value): string
+    {
+        return Str::of($value)->ascii()->lower()->trim()->value();
     }
 }
