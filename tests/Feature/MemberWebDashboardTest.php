@@ -28,7 +28,10 @@ it('shows a member their current programme and records a completed workout', fun
 
     $this->actingAs($member->user)->get('/member/dashboard')
         ->assertOk()
-        ->assertSee('Momentum programme')
+        ->assertSee('Momentum programme');
+
+    $this->actingAs($member->user)->get('/member/programme')
+        ->assertOk()
         ->assertSee('Goblet squat');
 
     $this->actingAs($member->user)->put(route('member.workouts.complete', $session), [

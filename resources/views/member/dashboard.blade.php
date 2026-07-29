@@ -1,10 +1,10 @@
-<x-layouts.app title="My programme | GymFlow" heading="My training">
+<x-layouts.app title="My training | GymFlow" heading="My training">
     <div class="dashboard-wrap" id="overview">
         <section class="dashboard-intro member-intro">
             <div>
                 <p class="eyebrow">Your training space</p>
                 <h2>Do the session. Keep the signal.</h2>
-                <p>Your coach sees completed sessions and difficulty feedback, so the next programme can fit you better.</p>
+                <p>Follow this week's plan, then share how each session felt.</p>
             </div>
             @if ($programme)
                 <div class="programme-period">{{ $programme->date_debut?->format('d M') ?? 'Now' }} to {{ $programme->date_fin?->format('d M') ?? 'Open-ended' }}</div>
@@ -12,51 +12,43 @@
         </section>
 
         @if ($programme)
-            <section class="member-progress-band" id="programme" aria-label="Programme completion">
+            <section class="member-progress-band" aria-label="Programme completion">
                 <div><p class="eyebrow">{{ $programme->titre }}</p><strong>{{ $stats['progress'] }}% complete</strong></div>
                 <div class="member-progress-track"><span style="width: {{ $stats['progress'] }}%"></span></div>
                 <span>{{ $stats['completed'] }} of {{ $stats['total'] }} sessions</span>
             </section>
 
-            <section class="member-session-list">
-                @foreach ($programme->sessions->sortBy('ordre') as $session)
-                    <article class="session-card {{ $session->statut === 'realise' ? 'session-done' : '' }}">
-                        <div class="session-heading">
-                            <div><p class="eyebrow">Session {{ $session->ordre }}</p><h2>{{ $session->jour }}</h2></div>
-                            <span class="status-pill {{ $session->statut === 'realise' ? 'status-good' : ($session->statut === 'non_realise' ? 'status-muted' : 'status-review') }}">{{ match ($session->statut) { 'realise' => 'Completed', 'non_realise' => 'Missed', default => 'Planned' } }}</span>
-                        </div>
-                        @if ($session->notes)<p class="session-note">{{ $session->notes }}</p>@endif
-                        <div class="exercise-list">
-                            @foreach ($session->exerciseDetails->sortBy('ordre') as $detail)
-                                <div class="exercise-row">
-                                    <img class="exercise-thumbnail" src="{{ $detail->exercise->resolvedImageUrl() }}" alt="{{ $detail->exercise->nom }}" loading="lazy">
-                                    <div class="exercise-copy"><strong>{{ $detail->exercise->nom }}</strong><span>{{ collect([$detail->series ? $detail->series.' sets' : null, $detail->repetitions ? $detail->repetitions.' reps' : null, $detail->duree_cardio ? $detail->duree_cardio.' min' : null])->filter()->join(' / ') ?: 'See coach notes' }}</span></div>
-                                    @if ($detail->repos)<small>{{ $detail->repos }} rest</small>@endif
-                                </div>
-                            @endforeach
-                        </div>
-                        @if ($session->statut === 'realise')
-                            <div class="session-complete-note"><strong>Logged {{ $session->realisee_le?->format('d M, H:i') }}</strong><span>{{ ucfirst($session->difficulte_ressentie ?? 'no difficulty shared') }}{{ $session->retour_membre ? ' / '.$session->retour_membre : '' }}</span></div>
-                        @elseif ($session->statut === 'non_realise')
-                            <div class="session-complete-note"><strong>Marked as missed</strong><span>{{ $session->raison_non_realisation ?: 'No reason shared.' }}</span></div>
-                        @else
-                            <form method="POST" action="{{ route('member.workouts.complete', $session) }}" class="complete-form">
-                                @csrf @method('PUT')
-                                <label><span>How did it feel?</span><select name="difficulte_ressentie" required><option value="">Choose difficulty</option><option value="facile">Easy</option><option value="moderee">Moderate</option><option value="difficile">Hard</option></select></label>
-                                <label><span>Quick note (optional)</span><input type="text" name="retour_membre" maxlength="500" placeholder="Energy, pain, a personal best..."></label>
-                                <button class="button button-primary" type="submit">Mark complete</button>
-                            </form>
-                            <details class="missed-workout"><summary>Could not do this session?</summary><form method="POST" action="{{ route('member.workouts.missed', $session) }}">@csrf @method('PUT')<label><span>Reason (optional)</span><input type="text" name="raison_non_realisation" maxlength="500" placeholder="No time, pain, recovery day..."></label><button class="button button-secondary" type="submit">Mark as missed</button></form></details>
-                        @endif
-                    </article>
-                @endforeach
+            <section class="member-overview-grid" aria-label="This week's training">
+                <article class="panel member-next-session">
+                    @if ($nextSession)
+                        <p class="eyebrow">Next planned session</p>
+                        <h2>{{ $nextSession->jour }}</h2>
+                        <p>{{ $nextSession->notes ?: ($nextSession->exerciseDetails->count() === 1 ? '1 exercise is ready for you.' : $nextSession->exerciseDetails->count().' exercises are ready for you.') }}</p>
+                        <dl class="member-session-metrics">
+                            <div><dt>Session</dt><dd>{{ $nextSession->ordre }} / {{ $stats['total'] }}</dd></div>
+                            <div><dt>Exercises</dt><dd>{{ $nextSession->exerciseDetails->count() }}</dd></div>
+                        </dl>
+                        <a class="button button-primary" href="{{ route('member.programme') }}#session-{{ $nextSession->id }}">Open session</a>
+                    @else
+                        <p class="eyebrow">This week</p>
+                        <h2>Programme complete</h2>
+                        <p>You have logged every session in this programme.</p>
+                        <a class="button button-secondary" href="{{ route('member.programme') }}">Review programme</a>
+                    @endif
+                </article>
+
+                <article class="panel member-weekly-signal">
+                    <p class="eyebrow">Week at a glance</p>
+                    <h2>{{ $stats['remaining'] }} session{{ $stats['remaining'] === 1 ? '' : 's' }} left</h2>
+                    <dl class="member-signal-list">
+                        <div><dt>Completed</dt><dd>{{ $stats['completed'] }}</dd></div>
+                        <div><dt>Remaining</dt><dd>{{ $stats['remaining'] }}</dd></div>
+                        <div><dt>Current plan</dt><dd>{{ $programme->sessions->count() }} session{{ $programme->sessions->count() === 1 ? '' : 's' }}</dd></div>
+                    </dl>
+                </article>
             </section>
         @else
-            <section class="panel empty-programme" id="programme"><p class="eyebrow">Nothing published yet</p><h2>Your coach is shaping your next programme.</h2><p>A published programme will appear here with your sessions and exercises.</p></section>
-        @endif
-
-        @if ($history->isNotEmpty())
-            <section class="history-section" id="history"><div><p class="eyebrow">Past programmes</p><h2>Training history</h2></div><div class="history-list">@foreach ($history as $pastProgramme)<span>{{ $pastProgramme->titre }} <small>{{ $pastProgramme->date_fin->format('M Y') }}</small></span>@endforeach</div></section>
+            <section class="panel empty-programme"><p class="eyebrow">Nothing published yet</p><h2>Your coach is shaping your next programme.</h2><p>A published programme will appear here with your sessions and exercises.</p></section>
         @endif
     </div>
 </x-layouts.app>
