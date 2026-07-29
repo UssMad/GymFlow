@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Web\AdminDashboardController;
+use App\Http\Controllers\Web\CoachAssistantController;
 use App\Http\Controllers\Web\CoachDashboardController;
 use App\Http\Controllers\Web\MemberDashboardController;
 use App\Http\Controllers\Web\WebAuthController;
@@ -38,6 +39,7 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/members/{member}', [CoachDashboardController::class, 'showMember'])->name('coach.members.show');
         Route::put('/members/{member}/sport-profile', [CoachDashboardController::class, 'updateSportProfile'])->name('coach.members.sport-profile.update');
         Route::post('/members/{member}/ai-generations', [CoachDashboardController::class, 'generateProgramme'])->name('coach.members.ai-generations.store');
+        Route::post('/members/{member}/assistant/messages', [CoachAssistantController::class, 'store'])->name('coach.members.assistant.messages.store');
         Route::put('/programmes/{programme}', [CoachDashboardController::class, 'updateProgramme'])->name('coach.programmes.update');
         Route::delete('/programmes/{programme}', [CoachDashboardController::class, 'destroyProgramme'])->name('coach.programmes.destroy');
         Route::put('/exercise-details/{exerciseDetail}', [CoachDashboardController::class, 'updateExerciseDetail'])->name('coach.exercise-details.update');

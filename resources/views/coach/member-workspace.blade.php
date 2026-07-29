@@ -92,6 +92,52 @@
             @endif
         </section>
 
+        <section class="coach-assistant-panel" id="assistant" aria-labelledby="assistant-title">
+            <div class="coach-assistant-heading">
+                <div>
+                    <p class="eyebrow">Coach assistant</p>
+                    <h2 id="assistant-title">Ask about {{ $member->user->prenom }}'s training</h2>
+                    <p>Get a practical second opinion on an exercise, prescription, progression, or member constraint.</p>
+                </div>
+                <span class="assistant-context-label">Context loaded</span>
+            </div>
+
+            <div class="assistant-thread" aria-live="polite">
+                @forelse ($assistantMessages as $message)
+                    <article class="assistant-message assistant-message--{{ $message->role }}">
+                        <div class="assistant-message-meta">
+                            <strong>{{ $message->role === 'assistant' ? 'GymFlow assistant' : 'Coach' }}</strong>
+                            <time datetime="{{ $message->created_at->toIso8601String() }}">{{ $message->created_at->format('d M, H:i') }}</time>
+                        </div>
+                        @php
+                            $messageContent = $message->role === 'assistant'
+                                ? str_replace(['**', '__', '`'], '', $message->contenu)
+                                : $message->contenu;
+                        @endphp
+                        <p>{!! nl2br(e($messageContent)) !!}</p>
+                    </article>
+                @empty
+                    <div class="assistant-empty-state">
+                        <strong>No questions yet</strong>
+                        <p>The assistant will use this member's profile and recent programme details in its answer.</p>
+                    </div>
+                @endforelse
+            </div>
+
+            <form method="POST" action="{{ route('coach.members.assistant.messages.store', $member) }}" class="assistant-composer">
+                @csrf
+                <label>
+                    <span>Your question</span>
+                    <textarea name="question" rows="3" maxlength="1200" required placeholder="Ask about an exercise, prescription, progression, or constraint...">{{ old('question') }}</textarea>
+                </label>
+                @error('question')<p class="assistant-form-error">{{ $message }}</p>@enderror
+                <div class="assistant-composer-footer">
+                    <small>Answers support coach judgement. They never change the programme automatically.</small>
+                    <button class="button button-primary" type="submit">Ask assistant</button>
+                </div>
+            </form>
+        </section>
+
         <section class="generation-panel" id="generation">
             <span class="workflow-step-number">02</span>
             <div><p class="eyebrow">Programme generation</p><h2>AI programme draft</h2><p>GymFlow queues a draft from the saved profile. The coach always reviews it before publishing.</p></div>

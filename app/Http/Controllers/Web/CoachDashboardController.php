@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Jobs\GenerateWorkoutProgrammeDraft;
 use App\Models\AiGeneration;
+use App\Models\CoachAiConversation;
 use App\Models\ExerciseDetail;
 use App\Models\Member;
 use App\Models\Programme;
@@ -52,7 +53,7 @@ class CoachDashboardController extends Controller
 
     public function showMember(Request $request, Member $member, CoachMemberProgressService $progress): View
     {
-        $this->ensureCoachManagesMember($request, $member);
+        $coach = $this->ensureCoachManagesMember($request, $member);
 
         $member->load([
             'user',
@@ -61,10 +62,20 @@ class CoachDashboardController extends Controller
             'programmes' => fn ($query) => $query->latest('id')->with('sessions.exerciseDetails.exercise'),
         ]);
 
+        $assistantConversation = CoachAiConversation::query()
+            ->where('coach_id', $coach->id)
+            ->where('membre_id', $member->id)
+            ->first();
+
+        $assistantMessages = $assistantConversation
+            ? $assistantConversation->messages()->latest('id')->take(8)->get()->reverse()->values()
+            : collect();
+
         return view('coach.member-workspace', [
             'member' => $member,
             'progress' => $progress->summary($member),
             'editingProfile' => $request->query('edit') === 'profile' || ! $member->sportProfile,
+            'assistantMessages' => $assistantMessages,
         ]);
     }
 
