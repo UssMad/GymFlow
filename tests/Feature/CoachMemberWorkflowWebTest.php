@@ -50,6 +50,8 @@ it('lets a coach manage an assigned member sport profile', function () {
         ->assertOk()
         ->assertSee('Sport profile summary')
         ->assertSee('Edit sport profile')
+        ->assertSee('member-signal-strip', false)
+        ->assertSee('member-profile-panel', false)
         ->assertSee('Build strength');
 
     $this->actingAs($coach->user)
