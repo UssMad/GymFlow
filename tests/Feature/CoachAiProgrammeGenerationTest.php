@@ -107,12 +107,12 @@ it('stores structured AI output as an unpublished programme draft', function () 
             'exercices' => array_fill(0, 3, [
                 'nom' => 'Developpe couche',
                 'groupe_musculaire' => 'Pectoraux',
-                'type' => 'moi',
+                'type' => 'isométrique',
                 'series' => 4,
                 'repetitions' => 10,
                 'repos' => 90,
                 'duree_cardio' => 0,
-                'notes' => 'Controle du mouvement.',
+                'notes poste' => 'Controle du mouvement.',
                 'progression' => 'Ajouter une repetition si possible.',
             ]),
         ]],
@@ -132,6 +132,7 @@ it('stores structured AI output as an unpublished programme draft', function () 
     ]);
     $this->assertDatabaseCount('workout_sessions', 1);
     $this->assertDatabaseCount('exercise_details', 3);
+    $this->assertDatabaseHas('exercise_details', ['notes' => 'Controle du mouvement. Ajouter une repetition si possible.']);
     expect($generation->fresh()->reponse_brute)
         ->toHaveKey('titre')
         ->toHaveKey('sessions.0.exercices.0.progression');
@@ -161,6 +162,59 @@ it('marks the generation as failed when the AI provider throws', function () {
         'reponse_brute->error' => 'AI generation failed. Please try again or review the member profile.',
     ]);
     $this->assertDatabaseCount('programmes', 0);
+});
+
+it('repairs common free-model JSON variants before saving the programme draft', function () {
+    $coach = createAiCoach();
+    $member = createAiMember($coach);
+    $generation = AiGeneration::query()->create([
+        'membre_id' => $member->id,
+        'demande_par_coach_id' => $coach->id,
+        'contexte_utilise' => ['objectif' => 'Endurance', 'niveau' => 'debutant'],
+        'generee_le' => now(),
+    ]);
+    WorkoutProgrammeGenerator::fake([<<<'JSON'
+        {'titre':'Programme mobilite','sessions':[{'jour':'Lundi','notes':'Mobilite progressive','exercices':[{'nom':'Etirement des jambes','groupe_musculaire':'Mobilite','type':'mobilite','series':1,'repetitions':0,'repos':0,'duree_cardio': inconnu,'notes':'Rythme confortable.','progression':'Ajouter 5 minutes.'}]}]}
+        JSON])->preventStrayPrompts();
+
+    (new GenerateWorkoutProgrammeDraft($generation->id))->handle(
+        app(WorkoutProgrammeGenerator::class),
+        app(WorkoutProgrammeDraftValidator::class),
+    );
+
+    $this->assertDatabaseHas('ai_generations', ['id' => $generation->id, 'statut' => 'terminee']);
+    $this->assertDatabaseHas('exercise_details', ['duree_cardio' => null]);
+});
+
+it('saves a safe fallback after retrying a recorded invalid AI response', function () {
+    $coach = createAiCoach();
+    $member = createAiMember($coach);
+    $generation = AiGeneration::query()->create([
+        'membre_id' => $member->id,
+        'demande_par_coach_id' => $coach->id,
+        'statut' => 'en_attente',
+        'contexte_utilise' => [
+            'objectif' => 'Perte de poids',
+            'niveau' => 'debutant',
+            'blessures' => 'Douleur a l epaule',
+            'jours_disponibles' => ['mardi', 'jeudi', 'samedi'],
+        ],
+        'reponse_brute' => [
+            'error_code' => 'invalid_response',
+            'raw_response' => '{invalid JSON}',
+        ],
+        'generee_le' => now(),
+    ]);
+    WorkoutProgrammeGenerator::fake([])->preventStrayPrompts();
+
+    (new GenerateWorkoutProgrammeDraft($generation->id))->handle(
+        app(WorkoutProgrammeGenerator::class),
+        app(WorkoutProgrammeDraftValidator::class),
+    );
+
+    $this->assertDatabaseHas('ai_generations', ['id' => $generation->id, 'statut' => 'terminee']);
+    $this->assertDatabaseCount('workout_sessions', 3);
+    $this->assertDatabaseCount('exercise_details', 9);
 });
 
 it('rejects incomplete AI output and exposes a clear error only to the assigned coach', function () {
