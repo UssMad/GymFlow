@@ -117,3 +117,53 @@ it('lets a member mark a planned workout as missed with a reason', function () {
         'raison_non_realisation' => 'Knee discomfort.',
     ]);
 });
+
+it('lets a member reopen a logged session so they can correct it', function () {
+    $member = Member::query()->create(['user_id' => User::factory()->create(['role' => 'member'])->id]);
+    $programme = Programme::query()->create([
+        'membre_id' => $member->id,
+        'titre' => 'Current programme',
+        'source' => 'manuel',
+        'statut' => 'publie',
+        'date_debut' => today()->subDay(),
+        'date_fin' => today()->addDay(),
+    ]);
+    $session = $programme->sessions()->create([
+        'jour' => 'Friday',
+        'ordre' => 1,
+        'statut' => 'realise',
+        'realisee_le' => now(),
+        'retour_membre' => 'I selected the wrong session.',
+        'difficulte_ressentie' => 'difficile',
+    ]);
+
+    $this->actingAs($member->user)
+        ->put(route('member.workouts.reopen', $session))
+        ->assertSessionHas('status', 'Friday is ready to log again.');
+
+    $this->assertDatabaseHas('workout_sessions', [
+        'id' => $session->id,
+        'statut' => 'planifie',
+        'realisee_le' => null,
+        'retour_membre' => null,
+        'difficulte_ressentie' => null,
+        'raison_non_realisation' => null,
+    ]);
+});
+
+it('does not let a member change sessions from an archived programme', function () {
+    $member = Member::query()->create(['user_id' => User::factory()->create(['role' => 'member'])->id]);
+    $programme = Programme::query()->create([
+        'membre_id' => $member->id,
+        'titre' => 'Archived programme',
+        'source' => 'manuel',
+        'statut' => 'publie',
+        'date_debut' => today()->subWeeks(2),
+        'date_fin' => today()->subDay(),
+    ]);
+    $session = $programme->sessions()->create(['jour' => 'Monday', 'ordre' => 1]);
+
+    $this->actingAs($member->user)
+        ->put(route('member.workouts.complete', $session), ['difficulte_ressentie' => 'moderee'])
+        ->assertNotFound();
+});

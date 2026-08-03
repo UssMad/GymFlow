@@ -36,9 +36,9 @@
                             @endforeach
                         </div>
                         @if ($session->statut === 'realise')
-                            <div class="session-complete-note"><strong>Logged {{ $session->realisee_le?->format('d M, H:i') }}</strong><span>{{ ucfirst($session->difficulte_ressentie ?? 'no difficulty shared') }}{{ $session->retour_membre ? ' / '.$session->retour_membre : '' }}</span></div>
+                            <div class="session-complete-note"><strong>Logged {{ $session->realisee_le?->format('d M, H:i') }}</strong><span>{{ ucfirst($session->difficulte_ressentie ?? 'no difficulty shared') }}{{ $session->retour_membre ? ' / '.$session->retour_membre : '' }}</span><form class="session-correction-form" method="POST" action="{{ route('member.workouts.reopen', $session) }}">@csrf @method('PUT')<button class="button button-small button-secondary" type="submit">Log again</button></form></div>
                         @elseif ($session->statut === 'non_realise')
-                            <div class="session-complete-note"><strong>Marked as missed</strong><span>{{ $session->raison_non_realisation ?: 'No reason shared.' }}</span></div>
+                            <div class="session-complete-note"><strong>Marked as missed</strong><span>{{ $session->raison_non_realisation ?: 'No reason shared.' }}</span><form class="session-correction-form" method="POST" action="{{ route('member.workouts.reopen', $session) }}">@csrf @method('PUT')<button class="button button-small button-secondary" type="submit">Log again</button></form></div>
                         @else
                             <form method="POST" action="{{ route('member.workouts.complete', $session) }}" class="complete-form">
                                 @csrf @method('PUT')

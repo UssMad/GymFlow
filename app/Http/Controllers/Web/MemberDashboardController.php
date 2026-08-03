@@ -32,8 +32,7 @@ class MemberDashboardController extends Controller
 
     public function completeWorkout(Request $request, WorkoutSession $workoutSession): RedirectResponse
     {
-        $member = $request->user()->member;
-        abort_unless($member && $workoutSession->programme->membre_id === $member->id && $workoutSession->programme->statut === 'publie', 404);
+        $this->ensureMemberCanManageCurrentWorkout($request, $workoutSession);
         abort_unless($workoutSession->statut === 'planifie', 422, 'Only planned sessions can be updated.');
 
         $data = $request->validate([
@@ -54,8 +53,7 @@ class MemberDashboardController extends Controller
 
     public function missWorkout(Request $request, WorkoutSession $workoutSession): RedirectResponse
     {
-        $member = $request->user()->member;
-        abort_unless($member && $workoutSession->programme->membre_id === $member->id && $workoutSession->programme->statut === 'publie', 404);
+        $this->ensureMemberCanManageCurrentWorkout($request, $workoutSession);
         abort_unless($workoutSession->statut === 'planifie', 422, 'Only planned sessions can be updated.');
 
         $data = $request->validate([
@@ -71,6 +69,22 @@ class MemberDashboardController extends Controller
         ]);
 
         return back()->with('status', "{$workoutSession->jour} is marked as missed.");
+    }
+
+    public function reopenWorkout(Request $request, WorkoutSession $workoutSession): RedirectResponse
+    {
+        $this->ensureMemberCanManageCurrentWorkout($request, $workoutSession);
+        abort_unless(in_array($workoutSession->statut, ['realise', 'non_realise'], true), 422, 'Only logged sessions can be reopened.');
+
+        $workoutSession->update([
+            'statut' => 'planifie',
+            'realisee_le' => null,
+            'retour_membre' => null,
+            'difficulte_ressentie' => null,
+            'raison_non_realisation' => null,
+        ]);
+
+        return back()->with('status', "{$workoutSession->jour} is ready to log again.");
     }
 
     /**
@@ -120,5 +134,20 @@ class MemberDashboardController extends Controller
                 'progress' => $sessions->isEmpty() ? 0 : (int) round(($completedSessions / $sessions->count()) * 100),
             ],
         ];
+    }
+
+    private function ensureMemberCanManageCurrentWorkout(Request $request, WorkoutSession $workoutSession): void
+    {
+        $member = $request->user()->member;
+        $programme = $workoutSession->programme;
+
+        abort_unless(
+            $member
+            && $programme->membre_id === $member->id
+            && $programme->statut === 'publie'
+            && (!$programme->date_debut || $programme->date_debut->isToday() || $programme->date_debut->isPast())
+            && (!$programme->date_fin || $programme->date_fin->isToday() || $programme->date_fin->isFuture()),
+            404,
+        );
     }
 }

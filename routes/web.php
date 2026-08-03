@@ -56,5 +56,7 @@ Route::middleware('auth')->group(function (): void {
             ->name('member.workouts.complete');
         Route::put('/workout-sessions/{workoutSession}/missed', [MemberDashboardController::class, 'missWorkout'])
             ->name('member.workouts.missed');
+        Route::put('/workout-sessions/{workoutSession}/reopen', [MemberDashboardController::class, 'reopenWorkout'])
+            ->name('member.workouts.reopen');
     });
 });
