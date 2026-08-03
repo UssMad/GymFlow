@@ -28,7 +28,12 @@ it('shows a member their current programme and records a completed workout', fun
 
     $this->actingAs($member->user)->get('/member/dashboard')
         ->assertOk()
-        ->assertSee('Momentum programme');
+        ->assertSee('Momentum programme')
+        ->assertSee('Make this week count.')
+        ->assertSee('member-progress-rail', false)
+        ->assertSee('next-session-exercise-list', false)
+        ->assertSee('Programme position')
+        ->assertSee('Goblet squat');
 
     $this->actingAs($member->user)->get('/member/programme')
         ->assertOk()
