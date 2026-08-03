@@ -25,7 +25,7 @@
                             <div class="member-programme-session-index">{{ str_pad((string) $session->ordre, 2, '0', STR_PAD_LEFT) }}</div>
                             <div class="member-programme-session-title"><p class="eyebrow">Session {{ $session->ordre }}</p><h2>{{ ucfirst($session->jour) }}</h2></div>
                             <div class="member-programme-session-state"><span>{{ $session->exerciseDetails->count() }} movement{{ $session->exerciseDetails->count() === 1 ? '' : 's' }}</span><span class="status-pill {{ $session->statut === 'realise' ? 'status-good' : ($session->statut === 'non_realise' ? 'status-muted' : 'status-review') }}">{{ match ($session->statut) { 'realise' => 'Completed', 'non_realise' => 'Missed', default => 'Planned' } }}</span></div>
-                        </div>
+                        </header>
                         @if ($session->notes)<p class="member-programme-session-note">{{ $session->notes }}</p>@endif
                         <div class="member-programme-exercises">
                             @foreach ($session->exerciseDetails->sortBy('ordre') as $detail)
