@@ -30,6 +30,32 @@ class MemberDashboardController extends Controller
         return view('member.history', $this->workspaceData($request));
     }
 
+    public function showHistoryProgramme(Request $request, Programme $programme): View
+    {
+        $member = $request->user()->member;
+
+        abort_unless(
+            $member
+            && $programme->membre_id === $member->id
+            && $programme->statut === 'publie'
+            && $programme->date_fin
+            && $programme->date_fin->lt(today()),
+            404,
+        );
+
+        $programme->load('sessions.exerciseDetails.exercise');
+        $sessions = $programme->sessions;
+
+        return view('member.history-show', [
+            'programme' => $programme,
+            'stats' => [
+                'total' => $sessions->count(),
+                'completed' => $sessions->where('statut', 'realise')->count(),
+                'missed' => $sessions->where('statut', 'non_realise')->count(),
+            ],
+        ]);
+    }
+
     public function completeWorkout(Request $request, WorkoutSession $workoutSession): RedirectResponse
     {
         $this->ensureMemberCanManageCurrentWorkout($request, $workoutSession);

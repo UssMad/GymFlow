@@ -52,6 +52,7 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/dashboard', [MemberDashboardController::class, 'index'])->name('member.dashboard');
         Route::get('/programme', [MemberDashboardController::class, 'programme'])->name('member.programme');
         Route::get('/history', [MemberDashboardController::class, 'history'])->name('member.history');
+        Route::get('/history/{programme}', [MemberDashboardController::class, 'showHistoryProgramme'])->name('member.history.show');
         Route::put('/workout-sessions/{workoutSession}/completion', [MemberDashboardController::class, 'completeWorkout'])
             ->name('member.workouts.complete');
         Route::put('/workout-sessions/{workoutSession}/missed', [MemberDashboardController::class, 'missWorkout'])
