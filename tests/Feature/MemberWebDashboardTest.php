@@ -37,7 +37,9 @@ it('shows a member their current programme and records a completed workout', fun
 
     $this->actingAs($member->user)->get('/member/programme')
         ->assertOk()
-        ->assertSee('Goblet squat');
+        ->assertSee('Goblet squat')
+        ->assertSee('member-programme-session', false)
+        ->assertSee('member-session-checkin', false);
 
     $this->actingAs($member->user)->put(route('member.workouts.complete', $session), [
         'difficulte_ressentie' => 'moderee',
@@ -93,6 +95,7 @@ it('serves focused overview, programme, and history pages for a member', functio
     $this->actingAs($member->user)->get(route('member.programme'))
         ->assertOk()
         ->assertSee('Supported split squat')
+        ->assertSee('member-programme-exercise', false)
         ->assertSee(route('member.workouts.complete', $currentSession), false)
         ->assertSee(route('member.workouts.missed', $currentSession), false);
 
