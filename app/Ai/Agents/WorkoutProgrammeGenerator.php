@@ -10,8 +10,8 @@ use Laravel\Ai\Enums\Lab;
 use Laravel\Ai\Promptable;
 use Stringable;
 
-#[MaxTokens(2200)]
-#[Timeout(180)]
+#[MaxTokens(3200)]
+#[Timeout(240)]
 class WorkoutProgrammeGenerator implements Agent, HasProviderOptions
 {
     use Promptable;

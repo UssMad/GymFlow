@@ -24,9 +24,9 @@
                             ['label' => 'Programmes', 'href' => route('coach.programmes.index'), 'active' => request()->routeIs('coach.programmes.*')],
                         ],
                         default => [
-                            ['label' => 'Overview', 'href' => route('member.dashboard').'#overview'],
-                            ['label' => 'My programme', 'href' => route('member.dashboard').'#programme'],
-                            ['label' => 'History', 'href' => route('member.dashboard').'#history'],
+                            ['label' => 'Overview', 'href' => route('member.dashboard'), 'active' => request()->routeIs('member.dashboard')],
+                            ['label' => 'My programme', 'href' => route('member.programme'), 'active' => request()->routeIs('member.programme')],
+                            ['label' => 'History', 'href' => route('member.history'), 'active' => request()->routeIs('member.history')],
                         ],
                     };
                 @endphp

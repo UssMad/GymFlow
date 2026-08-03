@@ -2,6 +2,7 @@
 
 use App\Jobs\GenerateWorkoutProgrammeDraft;
 use App\Models\Coach;
+use App\Models\Exercise;
 use App\Models\Member;
 use App\Models\Programme;
 use App\Models\SportProfile;
@@ -44,6 +45,13 @@ it('queues an AI programme for a coached member with a sport profile', function 
         'membre_id' => $member->id,
         'statut' => 'en_attente',
     ]);
+
+    $this->actingAs($coach->user)
+        ->get(route('coach.members.show', $member))
+        ->assertOk()
+        ->assertSee('generation-timeline', false)
+        ->assertSee('Waiting for the AI worker')
+        ->assertSee('Latest');
 });
 
 it('lets a coach validate and publish their member draft', function () {
@@ -66,4 +74,101 @@ it('lets a coach validate and publish their member draft', function () {
     $this->actingAs($coach->user)->post(route('coach.programmes.publish', $programme))
         ->assertSessionHas('status', 'Programme published for the member.');
     $this->assertDatabaseHas('programmes', ['id' => $programme->id, 'statut' => 'publie']);
+});
+
+it('lets the assigned coach edit an exercise prescription in a draft only', function () {
+    $coach = makeCoachForProgrammeWorkflow();
+    $member = Member::query()->create([
+        'user_id' => User::factory()->create(['role' => 'member'])->id,
+        'coach_id' => $coach->id,
+    ]);
+    $programme = Programme::query()->create([
+        'membre_id' => $member->id,
+        'titre' => 'Editable draft',
+        'source' => 'ia',
+        'statut' => 'brouillon',
+    ]);
+    $detail = $programme->sessions()->create(['jour' => 'Monday', 'ordre' => 1])
+        ->exerciseDetails()
+        ->create([
+            'exercice_id' => Exercise::query()->create([
+                'nom' => 'Goblet squat',
+                'groupe_musculaire' => 'Legs',
+                'type' => 'musculation',
+            ])->id,
+            'ordre' => 1,
+            'series' => 3,
+            'repetitions' => 10,
+        ]);
+
+    $this->actingAs($coach->user)
+        ->get(route('coach.members.show', $member))
+        ->assertOk()
+        ->assertSee('programme-exercise', false)
+        ->assertSee('programme-settings-form', false)
+        ->assertSee('Draft programme settings', false)
+        ->assertSee('Editable draft')
+        ->assertSee('1 session')
+        ->assertSee('Edit prescription')
+        ->assertSee('photo-1581009146145-b5ef050c2e1e', false);
+
+    $this->actingAs($coach->user)
+        ->get(route('coach.programmes.index'))
+        ->assertOk()
+        ->assertSee('programme-session', false)
+        ->assertSee('Goblet squat');
+
+    $this->actingAs($coach->user)
+        ->put(route('coach.exercise-details.update', $detail), [
+            'series' => 4,
+            'repetitions' => 12,
+            'repos' => '90 seconds',
+            'duree_cardio' => 0,
+            'notes' => 'Use a controlled tempo.',
+        ])
+        ->assertSessionHas('status', 'Exercise prescription updated.');
+
+    $this->assertDatabaseHas('exercise_details', [
+        'id' => $detail->id,
+        'series' => 4,
+        'repetitions' => 12,
+        'repos' => '90 seconds',
+    ]);
+
+    $programme->update(['statut' => 'valide']);
+
+    $this->actingAs($coach->user)
+        ->put(route('coach.exercise-details.update', $detail), ['series' => 5])
+        ->assertStatus(422);
+});
+
+it('lets the assigned coach delete a programme and its workout data', function () {
+    $coach = makeCoachForProgrammeWorkflow();
+    $member = Member::query()->create([
+        'user_id' => User::factory()->create(['role' => 'member'])->id,
+        'coach_id' => $coach->id,
+    ]);
+    $programme = Programme::query()->create([
+        'membre_id' => $member->id,
+        'titre' => 'Programme to delete',
+        'source' => 'ia',
+        'statut' => 'brouillon',
+    ]);
+    $session = $programme->sessions()->create(['jour' => 'Monday', 'ordre' => 1]);
+    $session->exerciseDetails()->create([
+        'exercice_id' => Exercise::query()->create([
+            'nom' => 'Bridge',
+            'groupe_musculaire' => 'Glutes',
+            'type' => 'musculation',
+        ])->id,
+        'ordre' => 1,
+    ]);
+
+    $this->actingAs($coach->user)
+        ->delete(route('coach.programmes.destroy', $programme))
+        ->assertSessionHas('status', 'Programme deleted.');
+
+    $this->assertDatabaseMissing('programmes', ['id' => $programme->id]);
+    $this->assertDatabaseCount('workout_sessions', 0);
+    $this->assertDatabaseCount('exercise_details', 0);
 });

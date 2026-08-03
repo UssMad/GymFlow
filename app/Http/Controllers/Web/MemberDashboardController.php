@@ -13,40 +13,21 @@ class MemberDashboardController extends Controller
 {
     public function index(Request $request): View
     {
-        $member = $request->user()->member;
-        abort_unless($member, 403);
+        $data = $this->workspaceData($request);
 
-        $programme = Programme::query()
-            ->where('membre_id', $member->id)
-            ->where('statut', 'publie')
-            ->where(fn ($query) => $query->whereNull('date_debut')->orWhereDate('date_debut', '<=', today()))
-            ->where(fn ($query) => $query->whereNull('date_fin')->orWhereDate('date_fin', '>=', today()))
-            ->with('sessions.exerciseDetails.exercise')
-            ->orderByDesc('date_debut')
-            ->latest('id')
-            ->first();
-
-        $history = Programme::query()
-            ->where('membre_id', $member->id)
-            ->where('statut', 'publie')
-            ->whereNotNull('date_fin')
-            ->whereDate('date_fin', '<', today())
-            ->latest('date_fin')
-            ->take(4)
-            ->get();
-        $sessions = $programme?->sessions ?? collect();
-        $completedSessions = $sessions->where('statut', 'realise')->count();
-
-        return view('member.dashboard', [
-            'programme' => $programme,
-            'history' => $history,
-            'stats' => [
-                'total' => $sessions->count(),
-                'completed' => $completedSessions,
-                'remaining' => $sessions->count() - $completedSessions,
-                'progress' => $sessions->isEmpty() ? 0 : (int) round(($completedSessions / $sessions->count()) * 100),
-            ],
+        return view('member.dashboard', $data + [
+            'nextSession' => $data['programme']?->sessions->sortBy('ordre')->firstWhere('statut', 'planifie'),
         ]);
+    }
+
+    public function programme(Request $request): View
+    {
+        return view('member.programme', $this->workspaceData($request));
+    }
+
+    public function history(Request $request): View
+    {
+        return view('member.history', $this->workspaceData($request));
     }
 
     public function completeWorkout(Request $request, WorkoutSession $workoutSession): RedirectResponse
@@ -90,5 +71,54 @@ class MemberDashboardController extends Controller
         ]);
 
         return back()->with('status', "{$workoutSession->jour} is marked as missed.");
+    }
+
+    /**
+     * Build the shared context used by every member workspace page.
+     *
+     * @return array{programme: Programme|null, history: \Illuminate\Support\Collection, stats: array{total: int, completed: int, remaining: int, progress: int}}
+     */
+    private function workspaceData(Request $request): array
+    {
+        $member = $request->user()->member;
+        abort_unless($member, 403);
+
+        $programme = Programme::query()
+            ->where('membre_id', $member->id)
+            ->where('statut', 'publie')
+            ->where(fn ($query) => $query->whereNull('date_debut')->orWhereDate('date_debut', '<=', today()))
+            ->where(fn ($query) => $query->whereNull('date_fin')->orWhereDate('date_fin', '>=', today()))
+            ->with('sessions.exerciseDetails.exercise')
+            ->orderByDesc('date_debut')
+            ->latest('id')
+            ->first();
+
+        $history = Programme::query()
+            ->where('membre_id', $member->id)
+            ->where('statut', 'publie')
+            ->whereNotNull('date_fin')
+            ->whereDate('date_fin', '<', today())
+            ->withCount([
+                'sessions as completed_sessions_count' => fn ($query) => $query->where('statut', 'realise'),
+                'sessions as missed_sessions_count' => fn ($query) => $query->where('statut', 'non_realise'),
+                'sessions',
+            ])
+            ->latest('date_fin')
+            ->take(12)
+            ->get();
+
+        $sessions = $programme?->sessions ?? collect();
+        $completedSessions = $sessions->where('statut', 'realise')->count();
+
+        return [
+            'programme' => $programme,
+            'history' => $history,
+            'stats' => [
+                'total' => $sessions->count(),
+                'completed' => $completedSessions,
+                'remaining' => $sessions->count() - $completedSessions,
+                'progress' => $sessions->isEmpty() ? 0 : (int) round(($completedSessions / $sessions->count()) * 100),
+            ],
+        ];
     }
 }

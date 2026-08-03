@@ -1,6 +1,6 @@
 <x-layouts.app title="{{ $member->user->prenom }} | GymFlow" heading="Member workspace">
     <div class="dashboard-wrap narrow-wrap">
-        <section class="dashboard-intro">
+        <section class="dashboard-intro member-workspace-intro">
             <div>
                 <p class="eyebrow">Coaching workspace</p>
                 <h2>{{ $member->user->prenom }} {{ $member->user->nom }}</h2>
@@ -9,16 +9,28 @@
             <a class="button button-secondary" href="{{ route('coach.dashboard') }}#members">Back to members</a>
         </section>
 
-        <section class="stat-grid coach-member-stats" aria-label="Member progress">
-            <article class="stat-card"><span>Sessions</span><strong>{{ $progress['completed_sessions'] }}/{{ $progress['total_sessions'] }}</strong><small>Completed workouts</small></article>
-            <article class="stat-card stat-teal"><span>Completion</span><strong>{{ $progress['completion_rate'] }}%</strong><small>Across current history</small></article>
-            <article class="stat-card stat-coral"><span>Hard sessions</span><strong>{{ $progress['difficulty']['difficile'] }}</strong><small>Useful coaching signal</small></article>
-            <article class="stat-card stat-gold"><span>Profile</span><strong>{{ $member->sportProfile ? 'Ready' : 'Needed' }}</strong><small>Required for AI generation</small></article>
+        <section class="member-signal-strip" aria-label="Member progress">
+            <article class="member-signal">
+                <span class="member-signal-index">01</span>
+                <div><small>Sessions</small><strong>{{ $progress['completed_sessions'] }}/{{ $progress['total_sessions'] }}</strong><p>Workouts completed</p></div>
+            </article>
+            <article class="member-signal member-signal--teal">
+                <span class="member-signal-index">02</span>
+                <div><small>Completion</small><strong>{{ $progress['completion_rate'] }}%</strong><p>Current history</p></div>
+            </article>
+            <article class="member-signal member-signal--coral">
+                <span class="member-signal-index">03</span>
+                <div><small>Hard sessions</small><strong>{{ $progress['difficulty']['difficile'] }}</strong><p>Coaching signal</p></div>
+            </article>
+            <article class="member-signal member-signal--gold">
+                <span class="member-signal-index">04</span>
+                <div><small>Sport profile</small><strong>{{ $member->sportProfile ? 'Ready' : 'Needed' }}</strong><p>AI generation context</p></div>
+            </article>
         </section>
 
-        <section class="panel management-form profile-panel" id="profile">
+        <section class="member-profile-panel" id="profile">
             @if ($editingProfile)
-                <div class="section-heading profile-panel-heading">
+                <div class="member-panel-heading profile-panel-heading">
                     <div>
                         <p class="eyebrow">{{ $member->sportProfile ? 'Update profile' : 'Step 1' }}</p>
                         <h2>{{ $member->sportProfile ? 'Edit sport profile' : 'Create sport profile' }}</h2>
@@ -28,7 +40,7 @@
                         <a class="button button-secondary button-small" href="{{ route('coach.members.show', $member) }}#profile">Cancel</a>
                     @endif
                 </div>
-                <form method="POST" action="{{ route('coach.members.sport-profile.update', $member) }}" class="form-grid">
+                <form method="POST" action="{{ route('coach.members.sport-profile.update', $member) }}" class="form-grid profile-edit-form">
                     @csrf @method('PUT')
                     <label>Goal<input name="objectif" value="{{ old('objectif', $member->sportProfile?->objectif) }}" required></label>
                     <label>Level<select name="niveau" required><option value="">Choose level</option>@foreach (['debutant' => 'Beginner', 'intermediaire' => 'Intermediate', 'avance' => 'Advanced'] as $value => $label)<option value="{{ $value }}" @selected(old('niveau', $member->sportProfile?->niveau) === $value)>{{ $label }}</option>@endforeach</select></label>
@@ -45,9 +57,9 @@
                     $levelLabels = ['debutant' => 'Beginner', 'intermediaire' => 'Intermediate', 'avance' => 'Advanced'];
                     $displayNumber = fn ($value) => $value === null ? 'Not provided' : rtrim(rtrim(number_format((float) $value, 2, '.', ''), '0'), '.');
                 @endphp
-                <div class="section-heading profile-panel-heading">
+                <div class="member-panel-heading profile-panel-heading">
                     <div>
-                        <p class="eyebrow">Step 1 complete</p>
+                        <p class="eyebrow">Step 1 / Profile complete</p>
                         <h2>Sport profile summary</h2>
                         <p>This saved context will be used when GymFlow prepares the AI programme draft.</p>
                     </div>
@@ -55,7 +67,7 @@
                 </div>
 
                 <div class="profile-overview" aria-label="Sport profile summary">
-                    <div class="profile-goal"><span>Goal</span><strong>{{ $profile->objectif }}</strong></div>
+                    <div class="profile-goal"><span>Primary goal</span><strong>{{ $profile->objectif }}</strong><small>Programme direction</small></div>
                     <dl class="profile-metrics">
                         <div><dt>Level</dt><dd>{{ $levelLabels[$profile->niveau] }}</dd></div>
                         <div><dt>Weight</dt><dd>{{ $displayNumber($profile->poids) }}{{ $profile->poids !== null ? ' kg' : '' }}</dd></div>
@@ -80,32 +92,139 @@
             @endif
         </section>
 
-        <section class="panel generation-panel" id="generation">
-            <div><p class="eyebrow">Step 2</p><h2>AI programme draft</h2><p>GymFlow queues a draft from the saved profile. The coach always reviews it before publishing.</p></div>
+        <section class="coach-assistant-panel" id="assistant" aria-labelledby="assistant-title">
+            <div class="coach-assistant-heading">
+                <div>
+                    <p class="eyebrow">Coach assistant</p>
+                    <h2 id="assistant-title">Ask about {{ $member->user->prenom }}'s training</h2>
+                    <p>Get a practical second opinion on an exercise, prescription, progression, or member constraint.</p>
+                </div>
+                <span class="assistant-context-label">Context loaded</span>
+            </div>
+
+            <div class="assistant-thread" aria-live="polite">
+                @forelse ($assistantMessages as $message)
+                    <article class="assistant-message assistant-message--{{ $message->role }}">
+                        <div class="assistant-message-meta">
+                            <strong>{{ $message->role === 'assistant' ? 'GymFlow assistant' : 'Coach' }}</strong>
+                            <time datetime="{{ $message->created_at->toIso8601String() }}">{{ $message->created_at->format('d M, H:i') }}</time>
+                        </div>
+                        @php
+                            $messageContent = $message->role === 'assistant'
+                                ? str_replace(['**', '__', '`'], '', $message->contenu)
+                                : $message->contenu;
+                        @endphp
+                        <p>{!! nl2br(e($messageContent)) !!}</p>
+                    </article>
+                @empty
+                    <div class="assistant-empty-state">
+                        <strong>No questions yet</strong>
+                        <p>The assistant will use this member's profile and recent programme details in its answer.</p>
+                    </div>
+                @endforelse
+            </div>
+
+            <form method="POST" action="{{ route('coach.members.assistant.messages.store', $member) }}" class="assistant-composer">
+                @csrf
+                <label>
+                    <span>Your question</span>
+                    <textarea name="question" rows="3" maxlength="1200" required placeholder="Ask about an exercise, prescription, progression, or constraint...">{{ old('question') }}</textarea>
+                </label>
+                @error('question')<p class="assistant-form-error">{{ $message }}</p>@enderror
+                <div class="assistant-composer-footer">
+                    <small>Answers support coach judgement. They never change the programme automatically.</small>
+                    <button class="button button-primary" type="submit">Ask assistant</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="generation-panel" id="generation">
+            <span class="workflow-step-number">02</span>
+            <div><p class="eyebrow">Programme generation</p><h2>AI programme draft</h2><p>GymFlow queues a draft from the saved profile. The coach always reviews it before publishing.</p></div>
             <form method="POST" action="{{ route('coach.members.ai-generations.store', $member) }}">@csrf<button class="button button-primary" type="submit" @disabled(! $member->sportProfile)>Generate programme</button></form>
         </section>
 
         @if ($member->aiGenerations->isNotEmpty())
-            <section class="generation-history"><p class="eyebrow">Generation history</p><div class="generation-list">@foreach ($member->aiGenerations as $generation)<span class="generation-status generation-status-{{ $generation->statut }}"><strong>{{ ['en_attente' => 'Queued', 'terminee' => 'Generated', 'echec' => 'Generation failed'][$generation->statut] ?? ucfirst(str_replace('_', ' ', $generation->statut)) }}</strong><small>{{ $generation->generee_le?->format('d M, H:i') }}</small>@if ($generation->statut === 'echec')<small>Provider unavailable or quota reached. Try again later.</small>@endif</span>@endforeach</div></section>
+            <section class="generation-history" aria-labelledby="generation-history-title">
+                <div class="generation-history-heading">
+                    <div><p class="eyebrow">AI activity</p><h2 id="generation-history-title">Generation history</h2></div>
+                    <span>{{ $member->aiGenerations->count() }} attempts</span>
+                </div>
+                <ol class="generation-timeline">
+                    @foreach ($member->aiGenerations as $generation)
+                        @php
+                            $generationLabels = ['en_attente' => 'Queued', 'terminee' => 'Generated', 'echec' => 'Generation failed'];
+                            $generationDescriptions = [
+                                'en_attente' => 'Waiting for the AI worker to prepare a new draft.',
+                                'terminee' => 'Draft created and ready for coach review.',
+                                'echec' => 'Provider unavailable or quota reached. Try again later.',
+                            ];
+                        @endphp
+                        <li class="generation-event generation-event--{{ $generation->statut }}">
+                            <span class="generation-event-marker" aria-hidden="true"></span>
+                            <div class="generation-event-copy">
+                                <div>
+                                    <strong>{{ $generationLabels[$generation->statut] ?? ucfirst(str_replace('_', ' ', $generation->statut)) }}</strong>
+                                    @if ($loop->first)<span class="generation-latest">Latest</span>@endif
+                                </div>
+                                <p>{{ $generationDescriptions[$generation->statut] ?? 'Generation status updated.' }}</p>
+                            </div>
+                            <time datetime="{{ ($generation->generee_le ?? $generation->created_at)?->toIso8601String() }}">
+                                {{ ($generation->generee_le ?? $generation->created_at)?->format('d M') }}
+                                <small>{{ ($generation->generee_le ?? $generation->created_at)?->format('H:i') }}</small>
+                            </time>
+                        </li>
+                    @endforeach
+                </ol>
+            </section>
         @endif
 
         <section class="programme-workspace" id="programmes">
-            <div class="section-heading"><p class="eyebrow">Step 3</p><h2>Review and publish</h2><p>A draft can be renamed and scheduled before validation. Published programmes become visible to the member.</p></div>
+            <div class="section-heading programme-section-heading"><p class="eyebrow">Step 3 / Coach review</p><h2>Review and publish</h2><p>A draft can be renamed and scheduled before validation. Published programmes become visible to the member.</p></div>
             @forelse ($member->programmes as $programme)
-                <article class="panel programme-review-card">
-                    <div class="panel-heading"><div><span class="status-pill {{ $programme->statut === 'publie' ? 'status-good' : 'status-review' }}">{{ ucfirst($programme->statut) }}</span><h2>{{ $programme->titre }}</h2><p class="muted-copy">{{ ucfirst($programme->source) }} programme / {{ $programme->sessions->count() }} sessions</p></div></div>
+                <article class="programme-review-card">
+                    <div class="programme-review-heading">
+                        <div><span class="status-pill {{ $programme->statut === 'publie' ? 'status-good' : 'status-review' }}">{{ ucfirst($programme->statut) }}</span><h2>{{ $programme->titre }}</h2></div>
+                        <div class="programme-review-facts">
+                            <span>{{ $programme->sessions->count() }} {{ Str::plural('session', $programme->sessions->count()) }}</span>
+                            <span>{{ ucfirst($programme->source) }} source</span>
+                            @if ($programme->statut === 'brouillon')<span>Editable draft</span>@endif
+                        </div>
+                    </div>
                     @if ($programme->statut === 'brouillon')
-                        <form method="POST" action="{{ route('coach.programmes.update', $programme) }}" class="form-grid programme-meta-form">@csrf @method('PUT')
-                            <label class="form-span-2">Programme name<input name="titre" value="{{ old('titre', $programme->titre) }}" required></label>
+                        <form method="POST" action="{{ route('coach.programmes.update', $programme) }}" class="programme-settings-form" aria-label="Draft programme settings">@csrf @method('PUT')
+                            <label class="programme-title-field">Programme name<input name="titre" value="{{ old('titre', $programme->titre) }}" required></label>
                             <label>Starts<input name="date_debut" type="date" value="{{ old('date_debut', $programme->date_debut?->format('Y-m-d')) }}"></label>
                             <label>Ends<input name="date_fin" type="date" value="{{ old('date_fin', $programme->date_fin?->format('Y-m-d')) }}"></label>
-                            <div class="form-actions form-span-2"><button class="button button-secondary" type="submit">Save programme details</button></div>
+                            <button class="button button-secondary" type="submit">Save details</button>
                         </form>
                     @endif
-                    <div class="programme-session-preview">@foreach ($programme->sessions->sortBy('ordre') as $session)<div><strong>{{ $session->jour }}</strong><span class="exercise-thumbnail-list">@foreach ($session->exerciseDetails->sortBy('ordre') as $detail)<span class="exercise-thumbnail-item"><img src="{{ $detail->exercise->resolvedImageUrl() }}" alt="{{ $detail->exercise->nom }}" loading="lazy"><span>{{ $detail->exercise->nom }}</span></span>@endforeach</span></div>@endforeach</div>
+                    <div class="programme-sessions">
+                        @foreach ($programme->sessions->sortBy('ordre') as $session)
+                            <section class="programme-session">
+                                <header class="programme-session-header">
+                                    <span class="programme-session-index">{{ str_pad((string) $session->ordre, 2, '0', STR_PAD_LEFT) }}</span>
+                                    <div>
+                                        <p>Training day</p>
+                                        <h3>{{ ucfirst($session->jour) }}</h3>
+                                        @if ($session->notes)<span>{{ $session->notes }}</span>@endif
+                                    </div>
+                                </header>
+                                <div class="programme-exercise-grid">
+                                    @foreach ($session->exerciseDetails->sortBy('ordre') as $detail)
+                                        @include('coach.partials.exercise-card', [
+                                            'detail' => $detail,
+                                            'editable' => $programme->statut === 'brouillon',
+                                        ])
+                                    @endforeach
+                                </div>
+                            </section>
+                        @endforeach
+                    </div>
                     <div class="review-actions">
                         @if ($programme->statut === 'brouillon')<form method="POST" action="{{ route('coach.programmes.validate', $programme) }}">@csrf<button class="button button-primary" type="submit">Validate programme</button></form>@endif
                         @if ($programme->statut === 'valide')<form method="POST" action="{{ route('coach.programmes.publish', $programme) }}">@csrf<button class="button button-primary" type="submit">Publish for member</button></form>@endif
+                        <form method="POST" action="{{ route('coach.programmes.destroy', $programme) }}">@csrf @method('DELETE')<button class="button button-secondary" type="submit">Delete programme</button></form>
                     </div>
                 </article>
             @empty

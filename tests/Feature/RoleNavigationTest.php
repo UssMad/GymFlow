@@ -33,12 +33,13 @@ it('shows coach navigation links for members and programmes', function () {
         ->assertSee(route('coach.programmes.index'), false);
 });
 
-it('shows member navigation links for a programme and history', function () {
+it('shows member navigation links for their focused workspace pages', function () {
     $member = Member::query()->create(['user_id' => User::factory()->create(['role' => 'member'])->id]);
 
     $this->actingAs($member->user)->get('/member/dashboard')
         ->assertOk()
         ->assertSee('My programme')
         ->assertSee('History')
-        ->assertSee(route('member.dashboard').'#history', false);
+        ->assertSee(route('member.programme'), false)
+        ->assertSee(route('member.history'), false);
 });

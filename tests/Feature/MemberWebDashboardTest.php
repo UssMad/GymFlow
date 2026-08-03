@@ -28,7 +28,10 @@ it('shows a member their current programme and records a completed workout', fun
 
     $this->actingAs($member->user)->get('/member/dashboard')
         ->assertOk()
-        ->assertSee('Momentum programme')
+        ->assertSee('Momentum programme');
+
+    $this->actingAs($member->user)->get('/member/programme')
+        ->assertOk()
         ->assertSee('Goblet squat');
 
     $this->actingAs($member->user)->put(route('member.workouts.complete', $session), [
@@ -47,6 +50,51 @@ it('does not allow a coach to use the member dashboard', function () {
     $coach = User::factory()->create(['role' => 'coach']);
 
     $this->actingAs($coach)->get('/member/dashboard')->assertForbidden();
+});
+
+it('serves focused overview, programme, and history pages for a member', function () {
+    $member = Member::query()->create(['user_id' => User::factory()->create(['role' => 'member'])->id]);
+    $currentProgramme = Programme::query()->create([
+        'membre_id' => $member->id,
+        'titre' => 'Current strength plan',
+        'source' => 'manuel',
+        'statut' => 'publie',
+        'date_debut' => today()->subDay(),
+        'date_fin' => today()->addDay(),
+    ]);
+    $currentSession = $currentProgramme->sessions()->create(['jour' => 'Tuesday', 'ordre' => 1]);
+    $exercise = Exercise::query()->create([
+        'nom' => 'Supported split squat',
+        'groupe_musculaire' => 'Legs',
+        'type' => 'musculation',
+    ]);
+    $currentSession->exerciseDetails()->create(['exercice_id' => $exercise->id, 'ordre' => 1, 'series' => 3, 'repetitions' => 8]);
+
+    $pastProgramme = Programme::query()->create([
+        'membre_id' => $member->id,
+        'titre' => 'Previous recovery plan',
+        'source' => 'manuel',
+        'statut' => 'publie',
+        'date_debut' => today()->subWeeks(2),
+        'date_fin' => today()->subDay(),
+    ]);
+    $pastProgramme->sessions()->create(['jour' => 'Monday', 'ordre' => 1, 'statut' => 'realise']);
+
+    $this->actingAs($member->user)->get(route('member.dashboard'))
+        ->assertOk()
+        ->assertSee('Next planned session')
+        ->assertSee(route('member.programme').'#session-'.$currentSession->id, false);
+
+    $this->actingAs($member->user)->get(route('member.programme'))
+        ->assertOk()
+        ->assertSee('Supported split squat')
+        ->assertSee(route('member.workouts.complete', $currentSession), false)
+        ->assertSee(route('member.workouts.missed', $currentSession), false);
+
+    $this->actingAs($member->user)->get(route('member.history'))
+        ->assertOk()
+        ->assertSee('Previous recovery plan')
+        ->assertSee('Completed');
 });
 
 it('lets a member mark a planned workout as missed with a reason', function () {

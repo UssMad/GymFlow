@@ -15,6 +15,6 @@ it('defines a structured weekly draft contract and keeps approval under coach co
         ->toContain('name, muscle group, type, sets, repetitions, rest, cardio duration, notes, and progression')
         ->toContain('Do not return a programme status, validation decision, or publication decision');
 
-    expect(TextGenerationOptions::forAgent($generator)->maxTokens)->toBe(2200);
+    expect(TextGenerationOptions::forAgent($generator)->maxTokens)->toBe(3200);
     expect($generator->providerOptions(Lab::OpenRouter))->toBe(['reasoning' => ['effort' => 'low', 'exclude' => true]]);
 });
