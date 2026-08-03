@@ -102,6 +102,7 @@ it('serves focused overview, programme, and history pages for a member', functio
     $this->actingAs($member->user)->get(route('member.history'))
         ->assertOk()
         ->assertSee('Previous recovery plan')
+        ->assertSee('member-history-record', false)
         ->assertSee('Completed');
 });
 
@@ -228,6 +229,8 @@ it('lets a member review the full detail of their archived programme only', func
         ->assertOk()
         ->assertSee('Archived strength block')
         ->assertSee('Assisted pull-up')
+        ->assertSee('member-history-summary', false)
+        ->assertSee('member-programme-session', false)
         ->assertSee('Logged');
 
     $this->actingAs($member->user)->get(route('member.history.show', $current))->assertNotFound();

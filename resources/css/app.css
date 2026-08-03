@@ -541,6 +541,41 @@ a { color: inherit; text-decoration: none; }
 .member-session-feedback--missed strong { color: var(--coral); }
 .member-session-feedback .session-correction-form { flex: 0 0 auto; margin: 0; }
 
+/* Member history: an archive that feels like a training record, not leftover dashboard cards. */
+.member-history, .member-history-detail { display: grid; gap: 20px; }
+.member-history .member-history-intro, .member-history-detail .member-history-detail-intro { align-items: center; margin: 0; padding: 4px 0; }
+.member-history-intro h2, .member-history-detail-intro h2 { max-width: 680px; margin: 6px 0 8px; overflow-wrap: anywhere; font-size: 30px; line-height: 1.08; }
+.member-history-intro p:not(.eyebrow), .member-history-detail-intro p:not(.eyebrow) { max-width: 650px; line-height: 1.55; }
+.member-history-count { display: grid; justify-items: end; gap: 3px; min-width: 150px; padding: 10px 13px; border: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow); }
+.member-history-count span, .member-history-summary-window span { color: var(--muted); font-size: 10px; font-weight: 750; text-transform: uppercase; }
+.member-history-count strong { color: var(--coral); font-size: 26px; line-height: 1; }
+.member-history-records { display: grid; gap: 12px; }
+.member-history-record { display: grid; grid-template-columns: 86px minmax(0, 1fr) minmax(220px, .7fr) auto; align-items: center; gap: 22px; padding: 18px 22px; border: 1px solid var(--line); border-left: 3px solid var(--coral); background: var(--surface); box-shadow: var(--shadow); }
+.member-history-record-date { display: grid; justify-items: start; align-content: center; gap: 1px; min-height: 60px; padding-right: 16px; border-right: 1px solid var(--line); }
+.member-history-record-date span { color: var(--coral); font-size: 10px; font-weight: 850; text-transform: uppercase; }
+.member-history-record-date strong { color: var(--ink); font-size: 26px; line-height: 1; }
+.member-history-record-date small { color: var(--muted); font-size: 10px; font-weight: 700; }
+.member-history-record-main { min-width: 0; }
+.member-history-record-main .eyebrow { margin: 0; }
+.member-history-record-main h2 { margin: 6px 0 7px; overflow-wrap: anywhere; font-size: 18px; line-height: 1.3; }
+.member-history-record-main > span { color: var(--muted); font-size: 12px; }
+.member-history-record-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0; }
+.member-history-record-stats div { min-width: 0; padding-left: 10px; border-left: 2px solid var(--line); }
+.member-history-record-stats dt, .member-history-record-stats dd { margin: 0; }
+.member-history-record-stats dt { color: var(--muted); font-size: 9px; font-weight: 750; text-transform: uppercase; }
+.member-history-record-stats dd { margin-top: 4px; color: var(--ink); font-size: 17px; font-weight: 850; }
+.member-history-record-action { white-space: nowrap; }
+.member-history-summary { display: grid; grid-template-columns: minmax(230px, .9fr) minmax(300px, 1.25fr) auto; align-items: center; gap: 28px; padding: 20px 24px; border: 1px solid var(--line); border-top: 3px solid var(--coral); background: var(--surface); box-shadow: var(--shadow); }
+.member-history-summary-heading .eyebrow { margin: 0; }
+.member-history-summary-heading strong { display: block; margin-top: 6px; color: var(--ink); font-size: 16px; line-height: 1.35; }
+.member-history-summary-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0; }
+.member-history-summary-stats div { min-width: 0; padding-left: 12px; border-left: 3px solid var(--coral); }
+.member-history-summary-stats dt, .member-history-summary-stats dd { margin: 0; }
+.member-history-summary-stats dt { color: var(--muted); font-size: 9px; font-weight: 750; text-transform: uppercase; }
+.member-history-summary-stats dd { margin-top: 5px; color: var(--ink); font-size: 20px; font-weight: 850; }
+.member-history-summary-window { display: grid; gap: 5px; min-width: 155px; text-align: right; }
+.member-history-summary-window strong { color: var(--ink); font-size: 12px; line-height: 1.4; }
+
 @media (max-width: 760px) {
     .coach-assistant-heading { display: grid; padding: 18px; }
     .assistant-context-label { width: max-content; }
@@ -576,6 +611,15 @@ a { color: inherit; text-decoration: none; }
     .member-session-checkin-heading { align-items: start; flex-direction: column; gap: 5px; }
     .member-session-feedback { align-items: stretch; flex-direction: column; padding: 16px 18px 18px; }
     .member-session-feedback .button { width: 100%; text-align: center; }
+    .member-history .member-history-intro, .member-history-detail .member-history-detail-intro { align-items: start; }
+    .member-history-intro h2, .member-history-detail-intro h2 { font-size: 27px; }
+    .member-history-count { width: 100%; justify-items: start; }
+    .member-history-record { grid-template-columns: 72px minmax(0, 1fr); gap: 16px; padding: 18px; }
+    .member-history-record-date { padding-right: 12px; }
+    .member-history-record-stats { grid-column: span 2; padding-top: 14px; border-top: 1px solid var(--line); }
+    .member-history-record-action { grid-column: span 2; width: 100%; text-align: center; }
+    .member-history-summary { grid-template-columns: 1fr; gap: 18px; padding: 18px; }
+    .member-history-summary-window { text-align: left; }
 }
 
 @media (max-width: 520px) {
