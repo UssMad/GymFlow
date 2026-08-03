@@ -1,26 +1,26 @@
 <x-layouts.app title="Training history | GymFlow" heading="Training history">
-    <div class="dashboard-wrap">
-        <section class="dashboard-intro member-intro">
+    <div class="dashboard-wrap member-history" id="history">
+        <section class="dashboard-intro member-intro member-history-intro">
             <div>
-                <p class="eyebrow">Previous programmes</p>
-                <h2>See the work behind you.</h2>
-                <p>Each finished programme stays here as a simple record of your training.</p>
+                <p class="eyebrow">Training archive</p>
+                <h2>Every finished plan, in one place.</h2>
+                <p>Review the sessions you completed and the notes you left along the way.</p>
             </div>
-            <div class="programme-period">{{ $history->count() }} saved programme{{ $history->count() === 1 ? '' : 's' }}</div>
+            <div class="programme-period member-history-count"><span>Saved programmes</span><strong>{{ $history->count() }}</strong></div>
         </section>
 
         @if ($history->isNotEmpty())
-            <section class="history-programme-grid" aria-label="Past programmes">
+            <section class="member-history-records" aria-label="Past programmes">
                 @foreach ($history as $pastProgramme)
-                    <article class="panel history-programme-card">
-                        <p class="eyebrow">Finished {{ $pastProgramme->date_fin->format('d M Y') }}</p>
-                        <h2>{{ $pastProgramme->titre }}</h2>
-                        <dl class="history-programme-stats">
+                    <article class="member-history-record">
+                        <div class="member-history-record-date"><span>{{ $pastProgramme->date_fin->format('M') }}</span><strong>{{ $pastProgramme->date_fin->format('d') }}</strong><small>{{ $pastProgramme->date_fin->format('Y') }}</small></div>
+                        <div class="member-history-record-main"><p class="eyebrow">Finished programme</p><h2>{{ $pastProgramme->titre }}</h2><span>{{ $pastProgramme->date_debut?->format('d M') ?? 'Start' }} to {{ $pastProgramme->date_fin->format('d M Y') }}</span></div>
+                        <dl class="member-history-record-stats">
                             <div><dt>Sessions</dt><dd>{{ $pastProgramme->sessions_count }}</dd></div>
                             <div><dt>Completed</dt><dd>{{ $pastProgramme->completed_sessions_count }}</dd></div>
                             <div><dt>Missed</dt><dd>{{ $pastProgramme->missed_sessions_count }}</dd></div>
                         </dl>
-                        <a class="button button-small button-secondary history-programme-action" href="{{ route('member.history.show', $pastProgramme) }}">View programme</a>
+                        <a class="button button-small button-secondary member-history-record-action" href="{{ route('member.history.show', $pastProgramme) }}">View programme</a>
                     </article>
                 @endforeach
             </section>
