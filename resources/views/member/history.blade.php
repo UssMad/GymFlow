@@ -20,6 +20,7 @@
                             <div><dt>Completed</dt><dd>{{ $pastProgramme->completed_sessions_count }}</dd></div>
                             <div><dt>Missed</dt><dd>{{ $pastProgramme->missed_sessions_count }}</dd></div>
                         </dl>
+                        <a class="button button-small button-secondary history-programme-action" href="{{ route('member.history.show', $pastProgramme) }}">View programme</a>
                     </article>
                 @endforeach
             </section>

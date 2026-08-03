@@ -28,7 +28,12 @@ it('shows a member their current programme and records a completed workout', fun
 
     $this->actingAs($member->user)->get('/member/dashboard')
         ->assertOk()
-        ->assertSee('Momentum programme');
+        ->assertSee('Momentum programme')
+        ->assertSee('Make this week count.')
+        ->assertSee('member-progress-rail', false)
+        ->assertSee('next-session-exercise-list', false)
+        ->assertSee('Programme position')
+        ->assertSee('Goblet squat');
 
     $this->actingAs($member->user)->get('/member/programme')
         ->assertOk()
@@ -116,4 +121,113 @@ it('lets a member mark a planned workout as missed with a reason', function () {
         'statut' => 'non_realise',
         'raison_non_realisation' => 'Knee discomfort.',
     ]);
+});
+
+it('lets a member reopen a logged session so they can correct it', function () {
+    $member = Member::query()->create(['user_id' => User::factory()->create(['role' => 'member'])->id]);
+    $programme = Programme::query()->create([
+        'membre_id' => $member->id,
+        'titre' => 'Current programme',
+        'source' => 'manuel',
+        'statut' => 'publie',
+        'date_debut' => today()->subDay(),
+        'date_fin' => today()->addDay(),
+    ]);
+    $session = $programme->sessions()->create([
+        'jour' => 'Friday',
+        'ordre' => 1,
+        'statut' => 'realise',
+        'realisee_le' => now(),
+        'retour_membre' => 'I selected the wrong session.',
+        'difficulte_ressentie' => 'difficile',
+    ]);
+
+    $this->actingAs($member->user)
+        ->put(route('member.workouts.reopen', $session))
+        ->assertSessionHas('status', 'Friday is ready to log again.');
+
+    $this->assertDatabaseHas('workout_sessions', [
+        'id' => $session->id,
+        'statut' => 'planifie',
+        'realisee_le' => null,
+        'retour_membre' => null,
+        'difficulte_ressentie' => null,
+        'raison_non_realisation' => null,
+    ]);
+});
+
+it('does not let a member change sessions from an archived programme', function () {
+    $member = Member::query()->create(['user_id' => User::factory()->create(['role' => 'member'])->id]);
+    $programme = Programme::query()->create([
+        'membre_id' => $member->id,
+        'titre' => 'Archived programme',
+        'source' => 'manuel',
+        'statut' => 'publie',
+        'date_debut' => today()->subWeeks(2),
+        'date_fin' => today()->subDay(),
+    ]);
+    $session = $programme->sessions()->create(['jour' => 'Monday', 'ordre' => 1]);
+
+    $this->actingAs($member->user)
+        ->put(route('member.workouts.complete', $session), ['difficulte_ressentie' => 'moderee'])
+        ->assertNotFound();
+});
+
+it('lets a member review the full detail of their archived programme only', function () {
+    $member = Member::query()->create(['user_id' => User::factory()->create(['role' => 'member'])->id]);
+    $exercise = Exercise::query()->create([
+        'nom' => 'Assisted pull-up',
+        'groupe_musculaire' => 'Back',
+        'type' => 'musculation',
+    ]);
+    $archived = Programme::query()->create([
+        'membre_id' => $member->id,
+        'titre' => 'Archived strength block',
+        'source' => 'manuel',
+        'statut' => 'publie',
+        'date_debut' => today()->subWeeks(2),
+        'date_fin' => today()->subDay(),
+    ]);
+    $session = $archived->sessions()->create([
+        'jour' => 'Wednesday',
+        'ordre' => 1,
+        'statut' => 'realise',
+        'realisee_le' => now()->subDay(),
+        'difficulte_ressentie' => 'moderee',
+    ]);
+    $session->exerciseDetails()->create(['exercice_id' => $exercise->id, 'ordre' => 1, 'series' => 3, 'repetitions' => 8]);
+
+    $current = Programme::query()->create([
+        'membre_id' => $member->id,
+        'titre' => 'Current plan',
+        'source' => 'manuel',
+        'statut' => 'publie',
+        'date_debut' => today()->subDay(),
+        'date_fin' => today()->addDay(),
+    ]);
+    $draft = Programme::query()->create([
+        'membre_id' => $member->id,
+        'titre' => 'Draft plan',
+        'source' => 'manuel',
+        'statut' => 'brouillon',
+        'date_fin' => today()->subDay(),
+    ]);
+    $otherArchived = Programme::query()->create([
+        'membre_id' => Member::query()->create(['user_id' => User::factory()->create(['role' => 'member'])->id])->id,
+        'titre' => 'Another member archive',
+        'source' => 'manuel',
+        'statut' => 'publie',
+        'date_fin' => today()->subDay(),
+    ]);
+
+    $this->actingAs($member->user)
+        ->get(route('member.history.show', $archived))
+        ->assertOk()
+        ->assertSee('Archived strength block')
+        ->assertSee('Assisted pull-up')
+        ->assertSee('Logged');
+
+    $this->actingAs($member->user)->get(route('member.history.show', $current))->assertNotFound();
+    $this->actingAs($member->user)->get(route('member.history.show', $draft))->assertNotFound();
+    $this->actingAs($member->user)->get(route('member.history.show', $otherArchived))->assertNotFound();
 });

@@ -444,6 +444,58 @@ a { color: inherit; text-decoration: none; }
 .assistant-composer-footer small { max-width: 560px; color: var(--muted); font-size: 10px; line-height: 1.45; }
 .assistant-form-error { margin: 8px 0 0; color: var(--coral); font-size: 11px; font-weight: 700; }
 
+.session-correction-form { margin-top: 8px; }
+.history-programme-action { margin-top: 18px; }
+.history-detail-band { grid-template-columns: minmax(220px, 1fr) minmax(300px, 1.3fr) auto; }
+.history-detail-stats { margin: 0; padding: 0; border: 0; }
+
+/* Member overview: a focused training brief rather than a generic dashboard. */
+.member-overview { display: grid; gap: 20px; }
+.member-overview .member-overview-intro { align-items: center; margin: 0; padding: 4px 0; }
+.member-overview-intro h2 { max-width: 620px; margin: 6px 0 8px; font-size: 30px; line-height: 1.08; }
+.member-overview-intro p:not(.eyebrow) { max-width: 640px; line-height: 1.55; }
+.member-overview-period { display: grid; gap: 4px; min-width: 190px; padding: 12px 14px; border: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow); }
+.member-overview-period span { color: var(--muted); font-size: 10px; font-weight: 750; text-transform: uppercase; }
+.member-overview-period strong { color: var(--ink); font-size: 13px; }
+.member-progress-rail { display: grid; grid-template-columns: minmax(220px, .9fr) minmax(260px, 1.3fr) auto; align-items: center; gap: 28px; padding: 20px 24px; border: 1px solid var(--line); border-top: 3px solid var(--teal); background: var(--surface); box-shadow: var(--shadow); }
+.member-progress-heading h2 { margin: 5px 0 0; overflow-wrap: anywhere; font-size: 17px; line-height: 1.35; }
+.member-progress-visual { display: grid; gap: 9px; min-width: 0; }
+.member-progress-track { height: 8px; overflow: hidden; background: var(--surface-muted); }
+.member-progress-track span { display: block; min-width: 3px; height: 100%; background: var(--teal); transition: width .25s ease; }
+.member-progress-label { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 11px; }
+.member-progress-label strong { color: var(--ink); font-size: 11px; }
+.member-progress-value { color: var(--teal-deep); font-size: 38px; line-height: 1; letter-spacing: 0; }
+.member-progress-value small { margin-left: 2px; color: var(--muted); font-size: 15px; }
+.member-overview-grid { grid-template-columns: minmax(0, 1.25fr) minmax(270px, .75fr); gap: 20px; }
+.member-next-session, .member-weekly-signal { min-width: 0; border: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow); }
+.member-next-session { padding: 26px; border-top: 3px solid var(--teal); }
+.member-weekly-signal { padding: 26px; border-top: 3px solid var(--gold); }
+.next-session-topline { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.next-session-topline > span { padding: 5px 7px; background: color-mix(in srgb, var(--teal) 13%, var(--surface)); color: var(--teal-deep); font-size: 10px; font-weight: 800; text-transform: uppercase; }
+.next-session-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-top: 10px; }
+.next-session-heading h2, .member-weekly-heading h2, .member-next-session > h2 { margin: 0; overflow-wrap: anywhere; font-size: 31px; line-height: 1; }
+.next-session-heading > span { padding-bottom: 3px; color: var(--muted); font-size: 12px; font-weight: 700; text-align: right; }
+.next-session-note { min-height: 44px; margin: 16px 0 0; color: var(--muted); font-size: 14px; line-height: 1.55; }
+.next-session-exercise-list { display: grid; gap: 0; margin: 20px 0 0; padding: 0; border-top: 1px solid var(--line); list-style: none; }
+.next-session-exercise-list li { display: flex; align-items: baseline; gap: 10px; min-width: 0; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.next-session-exercise-list li span { flex: 0 0 auto; color: var(--teal-deep); font-size: 10px; font-weight: 800; }
+.next-session-exercise-list li strong { overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.next-session-footer { display: flex; align-items: end; justify-content: space-between; gap: 18px; margin-top: 20px; }
+.member-session-metrics { display: flex; gap: 24px; margin: 0; padding: 0; border: 0; }
+.member-session-metrics div { min-width: 0; }
+.member-session-metrics dt { margin: 0; color: var(--muted); font-size: 9px; font-weight: 750; text-transform: uppercase; }
+.member-session-metrics dd { margin: 5px 0 0; color: var(--ink); font-size: 13px; font-weight: 800; }
+.member-next-session .button { flex: 0 0 auto; width: auto; margin: 0; }
+.member-weekly-signal > .eyebrow { margin: 0; }
+.member-weekly-heading { display: grid; gap: 8px; margin-top: 12px; }
+.member-weekly-heading > span { color: var(--gold); font-size: 12px; font-weight: 800; }
+.member-signal-list { display: grid; gap: 0; margin: 24px 0 0; padding-top: 12px; border-top: 1px solid var(--line); }
+.member-signal-list div { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.member-signal-list div:last-child { border-bottom: 0; }
+.member-signal-list dt { margin: 0; color: var(--muted); font-size: 11px; font-weight: 700; }
+.member-signal-list dd { display: flex; align-items: baseline; gap: 5px; margin: 0; color: var(--ink); font-size: 22px; font-weight: 800; }
+.member-signal-list dd small { color: var(--muted); font-size: 10px; font-weight: 700; }
+
 @media (max-width: 760px) {
     .coach-assistant-heading { display: grid; padding: 18px; }
     .assistant-context-label { width: max-content; }
@@ -451,6 +503,20 @@ a { color: inherit; text-decoration: none; }
     .assistant-composer { padding: 16px 18px; }
     .assistant-composer-footer { align-items: stretch; flex-direction: column; }
     .assistant-composer-footer .button { width: 100%; }
+    .history-detail-band { grid-template-columns: 1fr; gap: 18px; }
+    .history-detail-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .member-overview .member-overview-intro { align-items: start; }
+    .member-overview-intro h2 { font-size: 27px; }
+    .member-overview-period { width: 100%; }
+    .member-progress-rail { grid-template-columns: 1fr; gap: 16px; padding: 18px; }
+    .member-progress-value { font-size: 34px; }
+    .member-progress-label { align-items: start; flex-direction: column; gap: 3px; }
+    .member-next-session, .member-weekly-signal { padding: 20px; }
+    .next-session-heading { align-items: start; flex-direction: column; gap: 7px; }
+    .next-session-heading > span { padding: 0; text-align: left; }
+    .next-session-footer { align-items: stretch; flex-direction: column; }
+    .member-session-metrics { justify-content: space-between; gap: 12px; }
+    .member-next-session .button { width: 100%; text-align: center; }
 }
 
 @media (max-width: 520px) {
