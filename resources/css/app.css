@@ -637,3 +637,78 @@ a { color: inherit; text-decoration: none; }
     .member-next-session .button { width: 100%; text-align: center; }
     .history-programme-grid { grid-template-columns: 1fr; }
 }
+
+/* Member programme: an athletic training board for the work happening right now. */
+.member-programme { gap: 26px; }
+.member-programme .member-programme-intro { padding: 8px 0 2px; }
+.member-programme-intro h2 { max-width: 700px; font-size: 36px; line-height: 1; }
+.member-programme-intro p:not(.eyebrow) { max-width: 670px; font-size: 15px; }
+.member-programme-period { min-width: 210px; border-top: 3px solid var(--coral); }
+.member-programme-period strong { font-size: 14px; }
+.member-programme .member-progress-rail { grid-template-columns: minmax(250px, .9fr) minmax(280px, 1.45fr) auto; gap: 32px; padding: 22px 26px; border-top-color: var(--coral); }
+.member-programme .member-progress-heading h2 { font-size: 19px; }
+.member-programme .member-progress-track { height: 10px; }
+.member-programme .member-progress-track span { background: var(--coral); }
+.member-programme .member-progress-value { color: var(--coral); font-size: 44px; }
+.member-programme-session-list { gap: 24px; }
+.member-programme-session { --session-accent: var(--gold); position: relative; overflow: hidden; border-top: 1px solid var(--line); border-left: 4px solid var(--session-accent); box-shadow: 0 18px 36px rgb(0 0 0 / 10%); }
+.member-programme-session::before { position: absolute; top: 0; right: 0; left: 0; height: 4px; background: var(--session-accent); content: ''; }
+.member-programme-session--realise { --session-accent: var(--teal); }
+.member-programme-session--non_realise { --session-accent: var(--coral); }
+.member-programme-session--planifie { --session-accent: var(--gold); }
+.member-programme-session-header { grid-template-columns: 56px minmax(0, 1fr) auto; gap: 17px; padding: 27px 28px 20px; background: color-mix(in srgb, var(--session-accent) 8%, var(--surface)); }
+.member-programme-session-index { width: 56px; height: 56px; background: var(--session-accent); color: var(--sidebar); font-size: 15px; font-weight: 850; }
+.member-programme-session-title h2 { margin-top: 6px; font-size: 32px; line-height: .95; }
+.member-programme-session-state { gap: 12px; }
+.member-programme-session-count { padding: 7px 9px; border: 1px solid color-mix(in srgb, var(--session-accent) 42%, var(--line)); color: var(--ink) !important; font-size: 10px !important; font-weight: 800 !important; text-transform: uppercase; }
+.member-programme-session-state .status-pill { padding: 7px 9px; font-size: 10px; text-transform: uppercase; }
+.member-programme-session-note { margin: 0 28px 20px; max-width: 760px; padding-left: 16px; border-left: 2px solid var(--session-accent); color: var(--ink); font-size: 14px; line-height: 1.65; }
+.member-programme-exercises { margin: 0 28px; border-top: 2px solid var(--line); }
+.member-programme-exercise { grid-template-columns: 38px 82px minmax(180px, 1fr) auto; gap: 16px; min-height: 102px; padding: 16px 0; }
+.member-programme-exercise-order { align-self: start; padding-top: 6px; color: var(--session-accent); font-size: 12px; }
+.member-programme-exercise-image { width: 82px; height: 70px; object-fit: cover; box-shadow: 0 8px 18px rgb(0 0 0 / 14%); }
+.member-programme-exercise-copy { align-content: center; gap: 5px; }
+.member-programme-exercise-copy p { color: var(--session-accent); font-size: 10px; }
+.member-programme-exercise-copy strong { font-size: 17px; line-height: 1.2; }
+.member-programme-exercise-copy span { font-size: 12px; }
+.member-programme-exercise-prescription { display: flex; align-items: center; gap: 18px; margin: 0; padding-left: 18px; border-left: 1px solid var(--line); }
+.member-programme-exercise-prescription div { display: grid; gap: 3px; min-width: 34px; }
+.member-programme-exercise-prescription dt, .member-programme-exercise-prescription dd { margin: 0; }
+.member-programme-exercise-prescription dt { color: var(--muted); font-size: 9px; font-weight: 750; text-transform: uppercase; }
+.member-programme-exercise-prescription dd { color: var(--ink); font-size: 14px; font-weight: 850; white-space: nowrap; }
+.member-session-checkin { margin-top: 4px; padding: 22px 28px 24px; border-top: 2px solid var(--teal); background: color-mix(in srgb, var(--teal) 9%, var(--surface)); }
+.member-session-checkin-heading strong { font-size: 17px; }
+.member-session-checkin-heading > span { padding: 6px 8px; background: color-mix(in srgb, var(--teal) 14%, var(--surface)); color: var(--teal-deep); }
+.member-session-checkin .complete-form { grid-template-columns: minmax(180px, .7fr) minmax(220px, 1.7fr) auto; gap: 14px; }
+.member-session-checkin .button-primary { min-height: 46px; padding-inline: 20px; }
+.member-session-feedback { padding: 20px 28px; border-top: 2px solid var(--session-accent); }
+@media (prefers-reduced-motion: no-preference) {
+    .member-programme-session { transition: transform .18s ease, box-shadow .18s ease; }
+    .member-programme-session:hover { transform: translateY(-2px); box-shadow: 0 22px 42px rgb(0 0 0 / 16%); }
+    .member-programme-exercise-image { transition: transform .18s ease; }
+    .member-programme-exercise:hover .member-programme-exercise-image { transform: scale(1.03); }
+}
+@media (max-width: 960px) {
+    .member-programme .member-progress-rail { grid-template-columns: 1fr; gap: 18px; }
+    .member-programme .member-progress-value { font-size: 38px; }
+    .member-programme-exercise { grid-template-columns: 32px 72px minmax(0, 1fr); }
+    .member-programme-exercise-image { width: 72px; height: 64px; }
+    .member-programme-exercise-prescription { grid-column: 3; justify-content: start; padding: 12px 0 0; border-top: 1px solid var(--line); border-left: 0; }
+}
+@media (max-width: 760px) {
+    .member-programme-intro h2 { font-size: 29px; }
+    .member-programme-session-header { grid-template-columns: 48px minmax(0, 1fr); gap: 14px; padding: 22px 18px 17px; }
+    .member-programme-session-index { width: 48px; height: 48px; }
+    .member-programme-session-title h2 { font-size: 28px; }
+    .member-programme-session-state { grid-column: span 2; padding-left: 62px; }
+    .member-programme-session-note { margin: 0 18px 18px; font-size: 13px; }
+    .member-programme-exercises { margin: 0 18px; }
+    .member-programme-exercise { grid-template-columns: 25px 62px minmax(0, 1fr); gap: 11px; min-height: 0; padding: 14px 0; }
+    .member-programme-exercise-image { width: 62px; height: 56px; }
+    .member-programme-exercise-copy strong { font-size: 15px; }
+    .member-programme-exercise-prescription { grid-column: span 3; flex-wrap: wrap; gap: 13px; }
+    .member-session-checkin { padding: 18px; }
+    .member-session-checkin .complete-form { grid-template-columns: 1fr; }
+    .member-session-checkin .complete-form .button { grid-column: auto; width: 100%; }
+    .member-session-feedback { padding: 18px; }
+}

@@ -96,6 +96,7 @@ it('serves focused overview, programme, and history pages for a member', functio
         ->assertOk()
         ->assertSee('Supported split squat')
         ->assertSee('member-programme-exercise', false)
+        ->assertSee('member-programme-exercise-prescription', false)
         ->assertSee(route('member.workouts.complete', $currentSession), false)
         ->assertSee(route('member.workouts.missed', $currentSession), false);
 

@@ -3,8 +3,8 @@
         <section class="dashboard-intro member-intro member-programme-intro">
             <div>
                 <p class="eyebrow">Current training week</p>
-                <h2>Your plan, session by session.</h2>
-                <p>Follow the prescription, then leave a clear signal for your coach when you finish.</p>
+                <h2>Train with a plan that fits.</h2>
+                <p>Every session has one job: move well, log the work, and build your next week.</p>
             </div>
             @if ($programme)
                 <div class="programme-period member-programme-period"><span>Programme window</span><strong>{{ $programme->date_debut?->format('d M') ?? 'Now' }} to {{ $programme->date_fin?->format('d M') ?? 'Open-ended' }}</strong></div>
@@ -24,17 +24,22 @@
                         <header class="member-programme-session-header">
                             <div class="member-programme-session-index">{{ str_pad((string) $session->ordre, 2, '0', STR_PAD_LEFT) }}</div>
                             <div class="member-programme-session-title"><p class="eyebrow">Session {{ $session->ordre }}</p><h2>{{ ucfirst($session->jour) }}</h2></div>
-                            <div class="member-programme-session-state"><span>{{ $session->exerciseDetails->count() }} movement{{ $session->exerciseDetails->count() === 1 ? '' : 's' }}</span><span class="status-pill {{ $session->statut === 'realise' ? 'status-good' : ($session->statut === 'non_realise' ? 'status-muted' : 'status-review') }}">{{ match ($session->statut) { 'realise' => 'Completed', 'non_realise' => 'Missed', default => 'Planned' } }}</span></div>
+                            <div class="member-programme-session-state"><span class="member-programme-session-count">{{ $session->exerciseDetails->count() }} movement{{ $session->exerciseDetails->count() === 1 ? '' : 's' }}</span><span class="status-pill {{ $session->statut === 'realise' ? 'status-good' : ($session->statut === 'non_realise' ? 'status-muted' : 'status-review') }}">{{ match ($session->statut) { 'realise' => 'Completed', 'non_realise' => 'Missed', default => 'Planned' } }}</span></div>
                         </header>
                         @if ($session->notes)<p class="member-programme-session-note">{{ $session->notes }}</p>@endif
                         <div class="member-programme-exercises">
                             @foreach ($session->exerciseDetails->sortBy('ordre') as $detail)
-                                <div class="member-programme-exercise">
+                                <article class="member-programme-exercise">
                                     <div class="member-programme-exercise-order">{{ str_pad((string) $detail->ordre, 2, '0', STR_PAD_LEFT) }}</div>
                                     <img class="member-programme-exercise-image" src="{{ $detail->exercise->resolvedImageUrl() }}" alt="{{ $detail->exercise->nom }}" loading="lazy">
-                                    <div class="member-programme-exercise-copy"><p>{{ $detail->exercise->type ?? 'Exercise' }}</p><strong>{{ $detail->exercise->nom }}</strong><span>{{ collect([$detail->series ? $detail->series.' sets' : null, $detail->repetitions ? $detail->repetitions.' reps' : null, $detail->duree_cardio ? $detail->duree_cardio.' min' : null])->filter()->join(' / ') ?: 'Follow the coach prescription' }}</span></div>
-                                    @if ($detail->repos)<small class="member-programme-exercise-rest">{{ $detail->repos }} rest</small>@endif
-                                </div>
+                                    <div class="member-programme-exercise-copy"><p>{{ $detail->exercise->type ?? 'Exercise' }}</p><strong>{{ $detail->exercise->nom }}</strong><span>Follow the prescribed pace and form.</span></div>
+                                    <dl class="member-programme-exercise-prescription">
+                                        @if ($detail->series)<div><dt>Sets</dt><dd>{{ $detail->series }}</dd></div>@endif
+                                        @if ($detail->repetitions)<div><dt>Reps</dt><dd>{{ $detail->repetitions }}</dd></div>@endif
+                                        @if ($detail->duree_cardio)<div><dt>Time</dt><dd>{{ $detail->duree_cardio }} min</dd></div>@endif
+                                        @if ($detail->repos)<div><dt>Rest</dt><dd>{{ $detail->repos }}</dd></div>@endif
+                                    </dl>
+                                </article>
                             @endforeach
                         </div>
                         @if ($session->statut === 'realise')
