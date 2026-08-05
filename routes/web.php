@@ -3,6 +3,7 @@
 use App\Http\Controllers\Web\AdminDashboardController;
 use App\Http\Controllers\Web\CoachAssistantController;
 use App\Http\Controllers\Web\CoachDashboardController;
+use App\Http\Controllers\Web\MemberAssistantController;
 use App\Http\Controllers\Web\MemberDashboardController;
 use App\Http\Controllers\Web\WebAuthController;
 use Illuminate\Support\Facades\Route;
@@ -50,6 +51,7 @@ Route::middleware('auth')->group(function (): void {
 
     Route::prefix('member')->middleware('role:member')->group(function (): void {
         Route::get('/dashboard', [MemberDashboardController::class, 'index'])->name('member.dashboard');
+        Route::post('/assistant/messages', [MemberAssistantController::class, 'store'])->name('member.assistant.messages.store');
         Route::get('/programme', [MemberDashboardController::class, 'programme'])->name('member.programme');
         Route::get('/history', [MemberDashboardController::class, 'history'])->name('member.history');
         Route::get('/history/{programme}', [MemberDashboardController::class, 'showHistoryProgramme'])->name('member.history.show');

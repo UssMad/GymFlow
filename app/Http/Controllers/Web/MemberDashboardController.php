@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Models\MemberAiConversation;
 use App\Models\Programme;
 use App\Models\WorkoutSession;
 use Illuminate\Http\RedirectResponse;
@@ -14,9 +15,17 @@ class MemberDashboardController extends Controller
     public function index(Request $request): View
     {
         $data = $this->workspaceData($request);
+        $member = $request->user()->member;
+        $assistantConversation = MemberAiConversation::query()
+            ->where('membre_id', $member->id)
+            ->first();
+        $assistantMessages = $assistantConversation
+            ? $assistantConversation->messages()->latest('id')->take(8)->get()->reverse()->values()
+            : collect();
 
         return view('member.dashboard', $data + [
             'nextSession' => $data['programme']?->sessions->sortBy('ordre')->firstWhere('statut', 'planifie'),
+            'assistantMessages' => $assistantMessages,
         ]);
     }
 

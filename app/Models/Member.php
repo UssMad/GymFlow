@@ -66,4 +66,9 @@ class Member extends Model
     {
         return $this->hasMany(CoachAiConversation::class, 'membre_id');
     }
+
+    public function aiConversation(): HasOne
+    {
+        return $this->hasOne(MemberAiConversation::class, 'membre_id');
+    }
 }

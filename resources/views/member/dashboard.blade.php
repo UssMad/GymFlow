@@ -51,5 +51,40 @@
         @else
             <section class="panel empty-programme"><p class="eyebrow">Nothing published yet</p><h2>Your coach is shaping your next programme.</h2><p>A published programme will appear here with your sessions and exercises.</p></section>
         @endif
+
+        <section class="coach-assistant-panel member-assistant-panel" id="assistant" aria-labelledby="assistant-title">
+            <div class="coach-assistant-heading">
+                <div>
+                    <p class="eyebrow">Training assistant</p>
+                    <h2 id="assistant-title">Ask about your training</h2>
+                    <p>{{ $programme?->titre ?? 'No active programme' }}</p>
+                </div>
+                <span class="assistant-context-label">{{ $programme ? 'Programme context' : 'Profile context' }}</span>
+            </div>
+
+            <div class="assistant-thread" aria-live="polite">
+                @forelse ($assistantMessages as $message)
+                    <article class="assistant-message assistant-message--{{ $message->role }}">
+                        <div class="assistant-message-meta">
+                            <strong>{{ $message->role === 'assistant' ? 'GymFlow assistant' : 'You' }}</strong>
+                            <time datetime="{{ $message->created_at->toIso8601String() }}">{{ $message->created_at->format('d M, H:i') }}</time>
+                        </div>
+                        <p>{!! nl2br(e(str_replace(['**', '__', '`'], '', $message->contenu))) !!}</p>
+                    </article>
+                @empty
+                    <div class="assistant-empty-state"><strong>Start a training conversation</strong></div>
+                @endforelse
+            </div>
+
+            <form method="POST" action="{{ route('member.assistant.messages.store') }}" class="assistant-composer">
+                @csrf
+                <label>
+                    <span>Your question</span>
+                    <textarea name="question" rows="3" maxlength="1200" required placeholder="What would you like to ask?">{{ old('question') }}</textarea>
+                </label>
+                @error('question')<p class="assistant-form-error">{{ $message }}</p>@enderror
+                <div class="assistant-composer-footer"><button class="button button-primary" type="submit">Ask assistant</button></div>
+            </form>
+        </section>
     </div>
 </x-layouts.app>
