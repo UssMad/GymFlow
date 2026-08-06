@@ -8,7 +8,8 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body>
-        <div class="app-shell {{ auth()->check() ? '' : 'app-shell-auth' }}">
+        <a class="skip-link" href="#main-content">Skip to content</a>
+        <div class="app-shell {{ auth()->check() ? 'app-shell--'.auth()->user()->role : 'app-shell-auth' }}">
             @auth
                 @php
                     $navigation = match (auth()->user()->role) {
@@ -33,13 +34,21 @@
                 <aside class="sidebar" aria-label="Main navigation">
                     <a class="brand" href="{{ route('dashboard') }}" aria-label="GymFlow dashboard">
                         <span class="brand-mark">GF</span>
-                        <span>GymFlow</span>
+                        <span class="brand-copy">
+                            <strong>GymFlow</strong>
+                            <small>Train with signal</small>
+                        </span>
                     </a>
 
-                    <div class="sidebar-label">{{ ucfirst(auth()->user()->role) }} workspace</div>
+                    <div class="sidebar-label">
+                        <span>{{ ucfirst(auth()->user()->role) }} workspace</span>
+                        <small>Operations online</small>
+                    </div>
                     <nav class="nav-list">
                         @foreach ($navigation as $index => $item)
-                            <a class="nav-link {{ ($item['active'] ?? $index === 0) ? 'is-active' : '' }}" href="{{ $item['href'] }}">{{ $item['label'] }}</a>
+                            <a class="nav-link {{ ($item['active'] ?? $index === 0) ? 'is-active' : '' }}" href="{{ $item['href'] }}">
+                                <span>{{ $item['label'] }}</span>
+                            </a>
                         @endforeach
                     </nav>
 
@@ -59,16 +68,23 @@
                 </aside>
             @endauth
 
-            <main class="main-content {{ auth()->check() ? '' : 'auth-main' }}">
+            <main id="main-content" class="main-content {{ auth()->check() ? '' : 'auth-main' }}">
                 @auth
                     <header class="topbar">
                         <div>
                             <p class="eyebrow">GymFlow / {{ ucfirst(auth()->user()->role) }}</p>
                             <h1>{{ $heading ?? 'Dashboard' }}</h1>
                         </div>
-                        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch color theme" title="Switch color theme">
-                            <span data-theme-icon aria-hidden="true">Light</span>
-                        </button>
+                        <div class="topbar-actions">
+                            <span class="system-status"><i aria-hidden="true"></i> System ready</span>
+                            <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch color theme" title="Switch color theme">
+                                <span data-theme-icon aria-hidden="true">Light</span>
+                            </button>
+                            <form class="mobile-signout" method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button class="text-button" type="submit">Sign out</button>
+                            </form>
+                        </div>
                     </header>
                 @endauth
 

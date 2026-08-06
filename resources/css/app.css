@@ -716,3 +716,1006 @@ a { color: inherit; text-decoration: none; }
     .member-session-checkin .complete-form .button { grid-column: auto; width: 100%; }
     .member-session-feedback { padding: 18px; }
 }
+
+/* GymFlow 2026 UI system: athletic, operational, and consistent across roles. */
+:root {
+    --canvas: #f2f3ef;
+    --surface: #ffffff;
+    --surface-muted: #e8ece8;
+    --ink: #171b18;
+    --muted: #65706a;
+    --line: #cfd6d1;
+    --sidebar: #101512;
+    --sidebar-muted: #9eaaa3;
+    --teal: #29ad98;
+    --teal-deep: #087565;
+    --coral: #f05f55;
+    --gold: #e4aa35;
+    --blue: #2968d7;
+    --role-accent: var(--coral);
+    --shadow: 0 12px 28px rgb(26 35 29 / 8%);
+    color-scheme: light;
+}
+
+[data-theme='dark'] {
+    --canvas: #151a17;
+    --surface: #1c231f;
+    --surface-muted: #252e29;
+    --ink: #f3f5f1;
+    --muted: #aab4ae;
+    --line: #39433d;
+    --sidebar: #0b0f0d;
+    --sidebar-muted: #98a49d;
+    --teal: #48c4ae;
+    --teal-deep: #7ad7c7;
+    --coral: #ff7b70;
+    --gold: #efbd58;
+    --blue: #70a0ff;
+    --shadow: 0 14px 32px rgb(0 0 0 / 20%);
+    color-scheme: dark;
+}
+
+.app-shell--coach { --role-accent: var(--teal); }
+.app-shell--member { --role-accent: var(--gold); }
+
+html {
+    scroll-behavior: smooth;
+    scrollbar-color: var(--role-accent) var(--surface-muted);
+}
+
+body {
+    min-height: 100vh;
+    overflow-x: hidden;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+::selection {
+    background: var(--role-accent);
+    color: #fff;
+}
+
+img {
+    display: block;
+    max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+    border-radius: 2px;
+}
+
+button,
+a,
+input,
+select,
+textarea,
+summary {
+    outline-offset: 3px;
+}
+
+:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--role-accent) 70%, #fff);
+}
+
+.skip-link {
+    position: fixed;
+    top: 8px;
+    left: 8px;
+    z-index: 100;
+    padding: 10px 14px;
+    transform: translateY(-150%);
+    background: var(--surface);
+    color: var(--ink);
+    font-weight: 800;
+}
+
+.skip-link:focus {
+    transform: translateY(0);
+}
+
+.app-shell {
+    grid-template-columns: 272px minmax(0, 1fr);
+}
+
+.sidebar {
+    position: sticky;
+    isolation: isolate;
+    gap: 30px;
+    padding: 28px 22px 20px;
+    overflow: hidden;
+    background: var(--sidebar);
+}
+
+.sidebar::after {
+    position: absolute;
+    inset: 0 0 0 auto;
+    z-index: -1;
+    width: 4px;
+    background: var(--role-accent);
+    content: "";
+}
+
+.brand {
+    gap: 12px;
+    font-family: "Bahnschrift Condensed", "Arial Narrow", sans-serif;
+}
+
+.brand-mark {
+    position: relative;
+    width: 42px;
+    height: 42px;
+    border-color: var(--role-accent);
+    color: #fff;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 12px;
+}
+
+.brand-mark::after {
+    position: absolute;
+    right: -5px;
+    bottom: -5px;
+    width: 9px;
+    height: 9px;
+    background: var(--role-accent);
+    content: "";
+}
+
+.brand-copy {
+    display: grid;
+    gap: 1px;
+}
+
+.brand-copy strong {
+    font-size: 23px;
+    line-height: 1;
+}
+
+.brand-copy small {
+    color: var(--sidebar-muted);
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.sidebar-label {
+    display: grid;
+    gap: 5px;
+    padding: 14px 12px;
+    border-block: 1px solid rgb(255 255 255 / 13%);
+}
+
+.sidebar-label span {
+    color: #fff;
+}
+
+.sidebar-label small {
+    color: var(--sidebar-muted);
+    font-size: 9px;
+    font-weight: 650;
+    text-transform: none;
+}
+
+.nav-list {
+    gap: 3px;
+}
+
+.nav-link {
+    position: relative;
+    min-height: 45px;
+    display: flex;
+    align-items: center;
+    border: 0;
+    padding: 0 14px;
+    color: var(--sidebar-muted);
+    font-size: 14px;
+    font-weight: 750;
+}
+
+.nav-link::before {
+    width: 18px;
+    height: 2px;
+    margin-right: 11px;
+    background: rgb(255 255 255 / 18%);
+    content: "";
+}
+
+.nav-link:hover {
+    border: 0;
+    background: rgb(255 255 255 / 6%);
+}
+
+.nav-link.is-active {
+    border: 0;
+    background: #fff;
+    color: #101512;
+}
+
+.nav-link.is-active::before {
+    height: 4px;
+    background: var(--role-accent);
+}
+
+.app-shell--admin:has(#members:target) .nav-link.is-active,
+.app-shell--admin:has(#coaches:target) .nav-link.is-active,
+.app-shell--admin:has(#attendance:target) .nav-link.is-active {
+    background: transparent;
+    color: var(--sidebar-muted);
+}
+
+.app-shell--admin:has(#members:target) .nav-link[href$="#members"],
+.app-shell--admin:has(#coaches:target) .nav-link[href$="#coaches"],
+.app-shell--admin:has(#attendance:target) .nav-link[href$="#attendance"] {
+    background: #fff;
+    color: #101512;
+}
+
+.app-shell--admin:has(#members:target) .nav-link[href$="#members"]::before,
+.app-shell--admin:has(#coaches:target) .nav-link[href$="#coaches"]::before,
+.app-shell--admin:has(#attendance:target) .nav-link[href$="#attendance"]::before {
+    height: 4px;
+    background: var(--role-accent);
+}
+
+.sidebar-footer {
+    padding-top: 20px;
+    border-color: rgb(255 255 255 / 13%);
+}
+
+.avatar {
+    background: var(--role-accent);
+    color: #111613;
+    font-weight: 900;
+}
+
+.main-content {
+    min-width: 0;
+    padding: 30px clamp(24px, 3.5vw, 58px) 58px;
+}
+
+.topbar {
+    align-items: center;
+    max-width: 1360px;
+    margin-bottom: 34px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--line);
+}
+
+.topbar h1,
+.dashboard-intro h2,
+.page-intro h2,
+.panel-heading h2,
+.member-overview-intro h2,
+.member-programme-intro h2,
+.member-history-intro h2,
+.member-history-detail-intro h2 {
+    font-family: "Bahnschrift Condensed", "Arial Narrow", sans-serif;
+    font-weight: 700;
+}
+
+.topbar h1 {
+    margin-top: 5px;
+    font-size: 36px;
+    line-height: 1;
+}
+
+.topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mobile-signout {
+    display: none;
+    margin: 0;
+}
+
+.system-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 750;
+}
+
+.system-status i {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--teal);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--teal) 16%, transparent);
+}
+
+.theme-toggle {
+    min-width: 72px;
+    min-height: 38px;
+    border: 1px solid var(--line);
+    background: transparent;
+    box-shadow: none;
+}
+
+.theme-toggle:hover {
+    border-color: var(--role-accent);
+    color: var(--role-accent);
+}
+
+.eyebrow {
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 850;
+}
+
+.dashboard-wrap,
+.topbar,
+.notice {
+    max-width: 1360px;
+}
+
+.dashboard-intro {
+    position: relative;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-left: 18px;
+}
+
+.dashboard-intro::before {
+    position: absolute;
+    top: 2px;
+    bottom: 2px;
+    left: 0;
+    width: 4px;
+    background: var(--role-accent);
+    content: "";
+}
+
+.dashboard-intro h2 {
+    margin: 6px 0 7px;
+    font-size: 34px;
+    line-height: 1;
+}
+
+.dashboard-intro p:not(.eyebrow) {
+    max-width: 720px;
+    font-size: 14px;
+}
+
+.signal-label {
+    padding: 8px 11px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    font-size: 11px;
+}
+
+.stat-grid {
+    gap: 1px;
+    margin-bottom: 24px;
+    border: 1px solid var(--line);
+    background: var(--line);
+}
+
+.stat-card {
+    position: relative;
+    min-height: 130px;
+    padding: 20px 21px;
+    border: 0;
+    background: var(--surface);
+    box-shadow: none;
+}
+
+.stat-card::before {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: var(--ink);
+    content: "";
+}
+
+.stat-card.stat-teal::before { background: var(--teal); }
+.stat-card.stat-coral::before { background: var(--coral); }
+.stat-card.stat-gold::before { background: var(--gold); }
+
+.stat-card span,
+.stat-card small {
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.stat-card strong {
+    margin: 14px 0 10px;
+    font-family: "Bahnschrift Condensed", "Arial Narrow", sans-serif;
+    font-size: 43px;
+}
+
+.panel,
+.programme-review-card,
+.member-progress-rail,
+.member-next-session,
+.member-weekly-signal,
+.member-programme-session,
+.member-history-record,
+.member-history-summary,
+.member-overview-period,
+.member-programme-period,
+.management-form,
+.coach-assistant-panel {
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: var(--surface);
+    box-shadow: none;
+}
+
+.panel-heading {
+    align-items: center;
+    min-height: 74px;
+    padding: 18px 20px;
+}
+
+.panel-heading h2 {
+    margin-top: 4px;
+    font-size: 22px;
+}
+
+.count-label,
+.status-pill,
+.checked-in,
+.assistant-context-label,
+.member-programme-session-count {
+    border-radius: 2px;
+}
+
+.content-grid {
+    gap: 18px;
+}
+
+.content-grid,
+.content-grid > *,
+.admin-grid,
+.admin-grid > *,
+.coach-grid,
+.coach-grid > *,
+.panel,
+.panel-wide {
+    min-width: 0;
+}
+
+.admin-grid,
+.coach-grid {
+    grid-template-columns: minmax(0, 1fr) 330px;
+}
+
+.table-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+table {
+    min-width: 720px;
+}
+
+th {
+    padding: 11px 20px;
+    background: var(--surface-muted);
+    font-size: 9px;
+    letter-spacing: 0;
+}
+
+td {
+    padding: 14px 20px;
+}
+
+tbody tr {
+    transition: background-color .16s ease;
+}
+
+tbody tr:hover {
+    background: color-mix(in srgb, var(--role-accent) 5%, var(--surface));
+}
+
+.button {
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 2px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 850;
+}
+
+.button-primary {
+    background: var(--role-accent);
+    color: #101512;
+}
+
+.button-primary:hover {
+    background: color-mix(in srgb, var(--role-accent) 82%, #fff);
+}
+
+.button-secondary {
+    border-color: var(--line);
+    background: transparent;
+}
+
+.button-secondary:hover {
+    border-color: var(--role-accent);
+    color: var(--role-accent);
+}
+
+.button-small {
+    min-height: 34px;
+    padding: 7px 11px;
+    font-size: 11px;
+}
+
+.table-link {
+    color: var(--role-accent);
+    font-size: 11px;
+}
+
+.notice {
+    align-items: center;
+    min-height: 50px;
+    border: 1px solid var(--line);
+    border-left-width: 4px;
+    background: var(--surface);
+}
+
+.form-grid input,
+.form-grid select,
+.form-grid textarea,
+.attendance-filter input,
+.attendance-filter select,
+.plan-form input,
+.form-stack input:not([type='checkbox']),
+.assistant-composer textarea,
+.exercise-editor-form input,
+.exercise-editor-form textarea {
+    min-height: 44px;
+    border-color: var(--line);
+    border-radius: 2px;
+    background: var(--canvas);
+}
+
+.form-grid input:focus,
+.form-grid select:focus,
+.form-grid textarea:focus,
+.form-stack input:focus,
+.assistant-composer textarea:focus {
+    border-color: var(--role-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--role-accent) 18%, transparent);
+}
+
+.progress-row {
+    grid-template-columns: minmax(190px, .9fr) minmax(210px, 1.2fr) 72px auto;
+    gap: 18px;
+    padding: 18px 20px;
+}
+
+.progress-track {
+    height: 8px;
+}
+
+.progress-track span {
+    background: var(--role-accent);
+}
+
+.review-item {
+    border-left: 3px solid transparent;
+}
+
+.review-item:hover {
+    border-left-color: var(--role-accent);
+    background: color-mix(in srgb, var(--role-accent) 5%, var(--surface));
+}
+
+.programme-review-card {
+    overflow: hidden;
+}
+
+.programme-review-heading {
+    min-height: 84px;
+}
+
+.programme-session {
+    grid-template-columns: 165px minmax(0, 1fr);
+}
+
+.programme-session-header {
+    border-color: var(--line);
+}
+
+.programme-exercise {
+    border-radius: 3px;
+    box-shadow: none;
+}
+
+.coach-assistant-panel {
+    overflow: hidden;
+}
+
+.coach-assistant-heading,
+.assistant-composer {
+    border-color: var(--line);
+}
+
+.assistant-message {
+    border-radius: 3px;
+}
+
+.member-progress-rail {
+    border-top-color: var(--role-accent);
+}
+
+.member-progress-track span {
+    background: var(--role-accent);
+}
+
+.member-progress-value {
+    color: var(--role-accent);
+}
+
+.member-next-session,
+.member-weekly-signal {
+    border-left-color: var(--role-accent);
+}
+
+.member-programme-session {
+    border-left-color: var(--session-accent);
+}
+
+.member-programme-session-index {
+    border-radius: 2px;
+}
+
+.member-programme-exercise-image {
+    border-radius: 2px;
+}
+
+.member-history-record {
+    border-left-color: var(--role-accent);
+}
+
+.member-history-summary {
+    border-top-color: var(--role-accent);
+}
+
+.member-history-summary-stats div {
+    border-left-color: var(--role-accent);
+}
+
+.login-frame {
+    grid-template-columns: minmax(0, 1.15fr) minmax(390px, .85fr);
+}
+
+.login-intro {
+    position: relative;
+    isolation: isolate;
+    min-height: 100vh;
+    justify-content: space-between;
+    overflow: hidden;
+    background-color: #111713;
+    background-image: url('/images/gymflow-login-gym.png');
+    background-position: center;
+    background-size: cover;
+}
+
+.login-intro::before {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: rgb(8 13 10 / 72%);
+    content: "";
+}
+
+.login-intro::after {
+    position: absolute;
+    inset: auto 0 0;
+    z-index: -1;
+    height: 8px;
+    background: var(--coral);
+    content: "";
+}
+
+.brand-on-dark {
+    margin-bottom: 0;
+}
+
+.login-intro-copy {
+    max-width: 680px;
+    margin-block: auto;
+}
+
+.login-intro .eyebrow {
+    margin-top: 0;
+    color: #c7d0ca;
+}
+
+.login-intro h1 {
+    max-width: 660px;
+    margin: 14px 0 18px;
+    font-family: "Bahnschrift Condensed", "Arial Narrow", sans-serif;
+    font-size: 58px;
+    line-height: .98;
+}
+
+.login-copy {
+    max-width: 560px;
+    color: #d5ddd8;
+}
+
+.login-rhythm {
+    height: 48px;
+    margin-top: 0;
+}
+
+.login-rhythm span {
+    width: 28px;
+}
+
+.login-panel {
+    max-width: 520px;
+    padding: 54px;
+}
+
+.login-panel h2 {
+    margin-top: 6px;
+    font-family: "Bahnschrift Condensed", "Arial Narrow", sans-serif;
+    font-size: 36px;
+}
+
+.login-panel .button-primary {
+    width: 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .button,
+    .nav-link,
+    .theme-toggle,
+    .member-programme-session,
+    .programme-exercise {
+        transition: border-color .16s ease, background-color .16s ease, color .16s ease, transform .16s ease;
+    }
+
+    .button:hover {
+        transform: translateY(-1px);
+    }
+}
+
+@media (max-width: 1320px) {
+    .admin-grid,
+    .coach-grid,
+    .subscription-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .attendance-panel,
+    .review-panel {
+        max-width: none;
+    }
+}
+
+@media (max-width: 1080px) {
+    .app-shell {
+        grid-template-columns: 236px minmax(0, 1fr);
+    }
+
+    .sidebar {
+        padding-inline: 16px;
+    }
+
+    .progress-row {
+        grid-template-columns: minmax(180px, 1fr) minmax(190px, 1.3fr) auto;
+    }
+
+    .difficulty-label {
+        display: none;
+    }
+
+    .login-intro h1 {
+        font-size: 50px;
+    }
+}
+
+@media (max-width: 760px) {
+    .app-shell {
+        display: block;
+    }
+
+    .sidebar {
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 12px;
+        height: auto;
+        padding: 11px 14px;
+    }
+
+    .sidebar::after {
+        inset: auto 0 0;
+        width: auto;
+        height: 3px;
+    }
+
+    .brand-mark {
+        width: 36px;
+        height: 36px;
+    }
+
+    .brand-copy,
+    .sidebar-label,
+    .sidebar-footer {
+        display: none;
+    }
+
+    .nav-list {
+        display: flex;
+        gap: 4px;
+        min-width: 0;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .nav-list::-webkit-scrollbar {
+        display: none;
+    }
+
+    .nav-link {
+        flex: 0 0 auto;
+        min-height: 36px;
+        padding: 0 10px;
+        white-space: nowrap;
+    }
+
+    .nav-link::before {
+        display: none;
+    }
+
+    .main-content {
+        padding: 20px 15px 36px;
+    }
+
+    .topbar {
+        margin-bottom: 24px;
+        padding-bottom: 14px;
+    }
+
+    .topbar h1 {
+        font-size: 30px;
+    }
+
+    .system-status {
+        display: none;
+    }
+
+    .mobile-signout {
+        display: block;
+    }
+
+    .mobile-signout .text-button {
+        min-height: 38px;
+        padding: 0 8px;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 800;
+    }
+
+    .mobile-signout .text-button:hover {
+        color: var(--role-accent);
+    }
+
+    .dashboard-intro {
+        align-items: flex-start;
+        padding-left: 14px;
+    }
+
+    .dashboard-intro h2 {
+        font-size: 29px;
+    }
+
+    .stat-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .stat-card {
+        min-height: 116px;
+        padding: 16px;
+    }
+
+    .stat-card strong {
+        font-size: 34px;
+    }
+
+    .panel-heading {
+        min-height: 66px;
+        padding: 16px;
+    }
+
+    .progress-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 16px;
+    }
+
+    .programme-session {
+        grid-template-columns: 1fr;
+    }
+
+    .programme-session-header {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .programme-exercise-grid {
+        grid-template-columns: 1fr;
+        padding: 14px;
+    }
+
+    .member-programme-session,
+    .member-history-record,
+    .member-history-summary {
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+    .login-frame {
+        grid-template-columns: 1fr;
+    }
+
+    .login-intro {
+        min-height: 430px;
+        padding: 28px;
+    }
+
+    .login-intro h1 {
+        font-size: 42px;
+    }
+
+    .login-panel {
+        max-width: none;
+        padding: 42px 28px;
+    }
+}
+
+@media (max-width: 520px) {
+    .topbar-actions {
+        gap: 6px;
+    }
+
+    .theme-toggle {
+        min-width: 60px;
+    }
+
+    .stat-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stat-card {
+        min-height: 100px;
+    }
+
+    .stat-card strong {
+        margin-block: 8px;
+    }
+
+    .dashboard-intro h2,
+    .member-overview-intro h2,
+    .member-programme-intro h2,
+    .member-history-intro h2,
+    .member-history-detail-intro h2 {
+        font-size: 27px;
+    }
+
+    .login-intro {
+        min-height: 390px;
+    }
+
+    .login-intro h1 {
+        font-size: 38px;
+    }
+}

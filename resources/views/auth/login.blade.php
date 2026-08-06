@@ -5,9 +5,11 @@
                 <span class="brand-mark">GF</span>
                 <span>GymFlow</span>
             </a>
-            <p class="eyebrow">Training operations, in rhythm</p>
-            <h1>Every member deserves a programme that keeps moving.</h1>
-            <p class="login-copy">A focused workspace for the people who run the gym, coach its members, and do the work.</p>
+            <div class="login-intro-copy">
+                <p class="eyebrow">Training operations, in rhythm</p>
+                <h1>Every member deserves a programme that keeps moving.</h1>
+                <p class="login-copy">One focused workspace for gym operations, coaching decisions, and every completed session.</p>
+            </div>
             <div class="login-rhythm" aria-hidden="true">
                 <span></span><span></span><span></span><span></span><span></span>
             </div>
